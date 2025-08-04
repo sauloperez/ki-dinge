@@ -1,6 +1,7 @@
 import asyncio
 import pathlib
 
+from dotenv import load_dotenv
 from llama_index.core import (
     Settings,
     SimpleDirectoryReader,
@@ -10,10 +11,12 @@ from llama_index.core import (
 )
 from llama_index.core.agent.workflow import AgentWorkflow
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
-from llama_index.llms.anthropic import Anthropic
+from llama_index.llms.mistralai import MistralAI
+
+load_dotenv()
 
 Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-base-en-v1.5")
-Settings.llm = Anthropic(model="claude-3-haiku-20240307")
+Settings.llm = MistralAI(model="mistral-large-latest")  # codestral-2508
 
 
 # Create a RAG tool using LlamaIndex
