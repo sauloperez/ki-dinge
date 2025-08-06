@@ -44,8 +44,6 @@ async def _chat_async(message: Optional[str], interactive: bool) -> None:
     # Initialize agent
     agent = GmailAgent(settings)
 
-    print(settings)
-
     with console.status("[bold green]Initializing Gmail agent..."):
         try:
             await agent.initialize()
