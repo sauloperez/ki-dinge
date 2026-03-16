@@ -1,7 +1,7 @@
 #!/bin/sh
 
 MODEL="${1:-qwen2.5:7b}"
-QUERY="What time is it right now?"
+QUERY="What's the name of this host?"
 
 echo "Query: $QUERY"
 echo ""
@@ -20,8 +20,8 @@ REQ1=$(jq -n \
       {
         type: "function",
         function: {
-          name: "get_current_time",
-          description: "Get the current date and time",
+          name: "get_hostname",
+          description: "Get the hostname of the current machine",
           parameters: {
             type: "object",
             properties: {},
@@ -57,7 +57,7 @@ fi
 echo "→ Tool call: $TOOL_NAME"
 
 # Step 3: Execute the tool
-TOOL_RESULT=$(date)
+TOOL_RESULT=$(hostname)
 echo "→ Tool result: $TOOL_RESULT"
 echo ""
 

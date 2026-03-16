@@ -4,10 +4,10 @@ Demonstrates the tool calling (function calling) loop using Ollama's chat API.
 
 ## How it works
 
-The script sends a user query to the model along with a tool definition (`get_current_time`). If the model decides to call the tool, the script:
+The script sends a user query to the model along with a tool definition (`get_hostname`). If the model decides to call the tool, the script:
 
 1. Detects the tool call in the model's response
-2. Executes the tool locally (`date`)
+2. Executes the tool locally (`hostname`)
 3. Sends the result back to the model in a follow-up message
 4. Prints the model's final answer
 
