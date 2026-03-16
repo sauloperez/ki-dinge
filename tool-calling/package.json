@@ -2,7 +2,8 @@
   "name": "tool-calling",
   "type": "module",
   "scripts": {
-    "start": "tsx index.ts"
+    "start": "tsx tool-calling.ts",
+    "agent-loop": "tsx agent-loop.ts"
   },
   "devDependencies": {
     "tsx": "^4.0.0",

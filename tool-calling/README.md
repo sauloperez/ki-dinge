@@ -1,6 +1,6 @@
 # Tool Calling PoC
 
-Demonstrates the tool calling (function calling) loop using Ollama's chat API. Two implementations are provided for comparison — a shell script and a TypeScript version.
+Demonstrates the tool calling (function calling) loop using Ollama's chat API. Three implementations are provided for comparison.
 
 ## How it works
 
@@ -15,8 +15,9 @@ This illustrates the core agentic pattern: model requests a tool → host execut
 
 ## Implementations
 
-- **`tool-calling.sh`** — shell script using `curl` and `jq`. Lower-level: the raw HTTP requests and JSON manipulation are visible.
-- **`main.ts`** — TypeScript using `fetch`. Higher-level: typed data structures make the message flow easier to follow.
+- **`tool-calling.sh`** — shell script using `curl` and `jq`. Lowest-level: raw HTTP requests and JSON manipulation are fully visible.
+- **`tool-calling.ts`** — TypeScript using `fetch`. Two explicit `chat()` calls make the request/response structure clear.
+- **`agent-loop.ts`** — TypeScript with a `while` loop. The canonical agent loop: keeps calling the model until it stops requesting tools.
 
 ## Usage
 
@@ -34,6 +35,9 @@ This illustrates the core agentic pattern: model requests a tool → host execut
 pnpm install
 pnpm start
 pnpm start llama3.2
+
+pnpm agent-loop
+pnpm agent-loop llama3.2
 ```
 
 The model defaults to `qwen2.5:7b`. Not all Ollama models support tool calling — use one that does (e.g., `qwen2.5:7b`, `llama3.1`, `mistral-nemo`).
@@ -43,5 +47,5 @@ Pass `--debug` to print all requests and responses:
 ```bash
 DEBUG=1 ./tool-calling.sh
 pnpm start --debug
-pnpm start llama3.2 --debug
+pnpm agent-loop --debug
 ```
