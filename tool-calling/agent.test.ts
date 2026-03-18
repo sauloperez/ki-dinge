@@ -156,6 +156,22 @@ describe('Agent', () => {
   });
 
   describe('getToolResponse()', () => {
+    it('forwards tool arguments to the tool function', async () => {
+      const args = { maxCount: 5 };
+      const toolCallMessage = assistantMessageWithToolCall('gitStatus', args);
+      const finalMessage = assistantMessage('Done');
+
+      mockSend
+        .mockResolvedValueOnce(chatResponse(toolCallMessage))
+        .mockResolvedValueOnce(chatResponse(finalMessage));
+      mockGitStatus.mockResolvedValueOnce('{}');
+
+      const agent = new Agent(makeConfig());
+      await agent.generate();
+
+      expect(mockGitStatus).toHaveBeenCalledWith(args);
+    });
+
     it('calls the correct tool from TOOL_MAPPING and returns a tool message', async () => {
       const toolCallMessage = assistantMessageWithToolCall('gitStatus');
       const finalMessage = assistantMessage('Done');

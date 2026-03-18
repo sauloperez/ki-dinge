@@ -67,7 +67,7 @@ export class Agent {
 
     // Look up the correct tool locally, and call it with the provided arguments
     // Other tools can be added without changing the agentic loop
-    const toolResult = await TOOL_MAPPING[toolName]();
+    const toolResult = await TOOL_MAPPING[toolName](toolArgs);
 
     debug(`tool result:`, toolResult);
 
