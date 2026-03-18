@@ -2,14 +2,23 @@
   "name": "tool-calling",
   "type": "module",
   "scripts": {
-    "start": "tsx tool-calling.ts",
-    "agent-loop": "tsx agent-loop.ts"
+    "typecheck": "pnpm tsc --noEmit"
+  },
+  "dependencies": {
+    "@openrouter/ai-sdk-provider": "^2.3.3",
+    "@openrouter/sdk": "^0.9.11",
+    "dotenv": "^16.0.0"
   },
   "devDependencies": {
     "tsx": "^4.0.0",
     "typescript": "^5.0.0"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["esbuild"]
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ],
+    "ignoredBuiltDependencies": [
+      "@openrouter/sdk"
+    ]
   }
 }
