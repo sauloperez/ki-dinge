@@ -1,14 +1,15 @@
 {
-  "name": "tool-calling",
+  "name": "git-assistant",
   "type": "module",
   "scripts": {
     "test": "vitest run",
-    "typecheck": "pnpm tsc --noEmit"
+    "typecheck": "pnpm tsc --noEmit",
+    "start": "tsx git_assistant.ts"
   },
   "dependencies": {
-    "@openrouter/ai-sdk-provider": "^2.3.3",
     "@openrouter/sdk": "^0.9.11",
-    "dotenv": "^16.0.0"
+    "dotenv": "^16.0.0",
+    "simple-git": "^3.33.0"
   },
   "devDependencies": {
     "tsx": "^4.0.0",
