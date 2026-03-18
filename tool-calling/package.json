@@ -2,6 +2,7 @@
   "name": "tool-calling",
   "type": "module",
   "scripts": {
+    "test": "vitest run",
     "typecheck": "pnpm tsc --noEmit"
   },
   "dependencies": {
@@ -12,7 +13,8 @@
   },
   "devDependencies": {
     "tsx": "^4.0.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "vitest": "^4.1.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
