@@ -58,3 +58,17 @@ Technical explanation of the implementation.
 - Include clear usage instructions and examples
 - Document the approach and trade-offs made
 - Add dependency files (package.json, requirements.txt, etc.)
+
+## TypeScript Import Style
+
+TypeScript PoCs in this repo use `tsx` to run directly (no compilation step). Always import with `.ts` extensions, never `.js`:
+
+```ts
+// correct
+import { foo } from './bar.ts';
+
+// wrong
+import { foo } from './bar.js';
+```
+
+The tsconfig has `allowImportingTsExtensions: true` and `noEmit: true` to support this.

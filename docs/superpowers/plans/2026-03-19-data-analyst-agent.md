@@ -73,13 +73,13 @@ history.push({ role: 'assistant', content: text });
 
 **Steps:**
 
-- [ ] `cd data-analyst && pnpm init` (already done by scaffolding)
-- [ ] Install dependencies:
+- [x] `cd data-analyst && pnpm init` (already done by scaffolding)
+- [x] Install dependencies:
   ```bash
   pnpm add ai better-sqlite3 dotenv zod
   pnpm add -D tsx typescript @types/node @types/better-sqlite3
   ```
-- [ ] Update `package.json` scripts:
+- [x] Update `package.json` scripts:
   ```json
   {
     "type": "module",
@@ -90,19 +90,19 @@ history.push({ role: 'assistant', content: text });
     }
   }
   ```
-- [ ] Create `tsconfig.json` (copy from `git-assistant/tsconfig.json` — same settings)
-- [ ] Create `.gitignore`:
+- [x] Create `tsconfig.json` (copy from `git-assistant/tsconfig.json` — same settings)
+- [x] Create `.gitignore`:
   ```
   data/
   node_modules/
   .env
   dist/
   ```
-- [ ] Create `.env.example`:
+- [x] Create `.env.example`:
   ```
   AI_GATEWAY_API_KEY=your_key_here
   ```
-- [ ] Commit: `feat: scaffold data-analyst PoC`
+- [x] Commit: `feat: scaffold data-analyst PoC`
 
 ---
 
@@ -114,14 +114,14 @@ history.push({ role: 'assistant', content: text });
 
 **Steps:**
 
-- [ ] Create `seed.ts`. Structure:
+- [x] Create `seed.ts`. Structure:
   1. `import Database from 'better-sqlite3'` and `import { mkdirSync } from 'fs'`
   2. `mkdirSync('data', { recursive: true })` — creates `data/` if missing
   3. Open `new Database('data/store.db')`
   4. Run `CREATE TABLE IF NOT EXISTS` for each table (drop first if you want a clean seed)
   5. Insert rows using prepared statements
 
-- [ ] Tables and columns:
+- [x] Tables and columns:
   ```sql
   CREATE TABLE customers (
     id INTEGER PRIMARY KEY,
@@ -148,14 +148,14 @@ history.push({ role: 'assistant', content: text });
   );
   ```
 
-- [ ] Seed data tips:
+- [x] Seed data tips:
   - 5-8 countries (e.g. US, UK, Germany, France, Japan, Brazil, Canada)
   - 4-5 product categories (e.g. Electronics, Clothing, Books, Home, Sports)
   - ~10 customers, ~15 products, ~60 orders
   - Vary dates across 2023-2024 so date-range queries are interesting
 
-- [ ] Run it: `pnpm seed` — verify `data/store.db` is created, no errors
-- [ ] Commit: `feat: add seed script with sample e-commerce database`
+- [x] Run it: `pnpm seed` — verify `data/store.db` is created, no errors
+- [x] Commit: `feat: add seed script with sample e-commerce database`
 
 ---
 
