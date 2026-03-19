@@ -20,7 +20,7 @@ This PoC intentionally introduces the **Vercel AI SDK** (`ai`) and the **AI Gate
 
 ### Model
 
-Use the latest available Anthropic Claude model via AI Gateway (fetch the current model list at implementation time to select the highest-versioned `claude-sonnet-*` or equivalent).
+Use `alibaba/qwen-3-235b` via AI Gateway — the cheapest tool-use capable model available ($0.071/M input tokens). It uses a MoE architecture, keeping costs low despite its large parameter count.
 
 ### Entry Point
 
