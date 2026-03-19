@@ -167,13 +167,13 @@ history.push({ role: 'assistant', content: text });
 
 **Steps:**
 
-- [ ] Import `Database` from `better-sqlite3`, `tool` from `ai`, `z` from `zod`
-- [ ] Open the database at the top of the file:
+- [x] Import `Database` from `better-sqlite3`, `tool` from `ai`, `z` from `zod`
+- [x] Open the database at the top of the file:
   ```ts
   import Database from 'better-sqlite3';
   const db = new Database('data/store.db');
   ```
-- [ ] Implement `listTables`:
+- [x] Implement `listTables`:
   ```ts
   export const listTables = tool({
     description: 'List all tables in the database',
@@ -186,7 +186,7 @@ history.push({ role: 'assistant', content: text });
     },
   });
   ```
-- [ ] Implement `describeTable`:
+- [x] Implement `describeTable`:
   ```ts
   export const describeTable = tool({
     description: 'Get column names, types, and nullability for a table',
@@ -209,7 +209,7 @@ history.push({ role: 'assistant', content: text });
     },
   });
   ```
-- [ ] Implement `runQuery`:
+- [x] Implement `runQuery`:
   ```ts
   const ROW_LIMIT = 100;
 
@@ -230,8 +230,8 @@ history.push({ role: 'assistant', content: text });
     },
   });
   ```
-- [ ] Run `pnpm typecheck` — fix any errors
-- [ ] Commit: `feat: implement listTables, describeTable, runQuery tools`
+- [x] Run `pnpm typecheck` — fix any errors
+- [x] Commit: `feat: implement listTables, describeTable, runQuery tools`
 
 ---
 
