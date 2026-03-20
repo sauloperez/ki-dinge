@@ -3,13 +3,20 @@ import { tool } from "ai";
 import z from "zod";
 import type { TableRow, PragmaRow, Row, ListTablesResult, DescribeTableResult, RunQueryResult } from "./types.ts";
 
-export const db = new Database(process.env.DB_PATH ?? 'data/store.db', { readonly: true });
+let _db: Database.Database | null = null;
+
+export const getDb = (): Database.Database => {
+  if (!_db) {
+    _db = new Database(process.env.DB_PATH ?? 'data/store.db', { readonly: true });
+  }
+  return _db;
+};
 
 export const listTables = tool({
   description: 'List all tables in the database',
   inputSchema: z.object({}),
   execute: async (): Promise<ListTablesResult> => {
-    const rows = db.prepare<[], TableRow>(
+    const rows = getDb().prepare<[], TableRow>(
       "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"
     ).all();
     return { tables: rows.map(r => r.name) };
@@ -23,12 +30,12 @@ export const describeTable = tool({
     const safeName = tableName.replace(/[^a-zA-Z0-9_]/g, '');
     if (safeName !== tableName) return { error: 'Invalid table name.' };
 
-    const tables = db.prepare<[string], TableRow>(
+    const tables = getDb().prepare<[string], TableRow>(
       "SELECT name FROM sqlite_master WHERE type='table' AND name=?"
     ).all(tableName);
     if (tables.length === 0) return { error: 'Table not found.' };
 
-    const info = db.prepare<[], PragmaRow>(`PRAGMA table_info("${safeName}")`).all();
+    const info = getDb().prepare<[], PragmaRow>(`PRAGMA table_info("${safeName}")`).all();
     return {
       columns: info.map(col => ({
         name: col.name,
@@ -49,7 +56,7 @@ export const runQuery = tool({
       return { error: 'Only SELECT statements are allowed.' };
     }
     try {
-      const rows = db.prepare<[], Row>(sql).all();
+      const rows = getDb().prepare<[], Row>(sql).all();
       const truncated = rows.length > ROW_LIMIT;
       return { rows: rows.slice(0, ROW_LIMIT), truncated };
     } catch (err) {

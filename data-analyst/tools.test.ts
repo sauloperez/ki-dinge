@@ -6,12 +6,10 @@ import type { ListTablesResult, Column, Row, RunQuerySuccess } from './types.ts'
 
 const TEST_DB = '/tmp/test-analyst.db';
 
-// Must be set before tools.ts is imported so the module opens the test db.
-// The file must also exist before import since the connection is read-only.
+// Must be set before the first tool call so getDb() opens the test db.
 process.env.DB_PATH = TEST_DB;
-new Database(TEST_DB).close();
 
-const { listTables, describeTable, runQuery, db } = await import('./tools.ts') as any;
+const { listTables, describeTable, runQuery, getDb } = await import('./tools.ts') as any;
 
 const opts: ToolExecutionOptions = {
   toolCallId: 'test',
@@ -57,7 +55,11 @@ afterAll(() => {
 
 describe('database connection', () => {
   test('is opened in read-only mode', () => {
-    expect(db.readonly).toBe(true);
+    expect(getDb().readonly).toBe(true);
+  });
+
+  test('returns the same cached instance on repeated calls', () => {
+    expect(getDb()).toBe(getDb());
   });
 });
 
