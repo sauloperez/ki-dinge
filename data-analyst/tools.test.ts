@@ -6,10 +6,12 @@ import type { ListTablesResult, Column, Row, RunQuerySuccess } from './types.ts'
 
 const TEST_DB = '/tmp/test-analyst.db';
 
-// Must be set before tools.ts is imported so the module opens the test db
+// Must be set before tools.ts is imported so the module opens the test db.
+// The file must also exist before import since the connection is read-only.
 process.env.DB_PATH = TEST_DB;
+new Database(TEST_DB).close();
 
-const { listTables, describeTable, runQuery } = await import('./tools.ts');
+const { listTables, describeTable, runQuery, db } = await import('./tools.ts') as any;
 
 const opts: ToolExecutionOptions = {
   toolCallId: 'test',
@@ -51,6 +53,12 @@ beforeAll(() => {
 
 afterAll(() => {
   if (existsSync(TEST_DB)) unlinkSync(TEST_DB);
+});
+
+describe('database connection', () => {
+  test('is opened in read-only mode', () => {
+    expect(db.readonly).toBe(true);
+  });
 });
 
 describe('listTables', () => {
@@ -96,6 +104,7 @@ describe('runQuery', () => {
     const result = await runQuery.execute!({ sql: 'DROP TABLE customers' }, opts) as { error: string };
     expect(result).toHaveProperty('error');
   });
+
 
   test('returns error for invalid SQL', async () => {
     const result = await runQuery.execute!({ sql: 'SELECT * FROM nonexistent_table' }, opts) as { error: string };

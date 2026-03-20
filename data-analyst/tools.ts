@@ -3,7 +3,7 @@ import { tool } from "ai";
 import z from "zod";
 import type { TableRow, PragmaRow, Row, ListTablesResult, DescribeTableResult, RunQueryResult } from "./types.ts";
 
-const db = new Database(process.env.DB_PATH ?? 'data/store.db');
+export const db = new Database(process.env.DB_PATH ?? 'data/store.db', { readonly: true });
 
 export const listTables = tool({
   description: 'List all tables in the database',
