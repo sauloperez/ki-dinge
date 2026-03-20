@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "skills": {
+    "ai-sdk": {
+      "source": "vercel/ai",
+      "sourceType": "github",
+      "computedHash": "58ce68f628890c3925aea2b5435a649251ac182057541045c68fc19a27aaa0ec"
+    },
+    "openrouter-typescript-sdk": {
+      "source": "OpenRouterTeam/agent-skills",
+      "sourceType": "github",
+      "computedHash": "0cb0e2f07f6b42fb8974c2ee89ca3ba3a103dfe565f12bc7ca9f41945fc7227a"
+    }
+  }
+}
