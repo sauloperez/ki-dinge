@@ -41,6 +41,14 @@ rl.on('close', () => {
   process.exit(0);
 });
 
+const streamResponse = async (result: ReturnType<typeof streamText>) => {
+  process.stdout.write(`\n${c.green}${c.bold}Agent${c.reset} › `);
+  for await (const chunk of result.textStream) {
+    process.stdout.write(chunk);
+  }
+  process.stdout.write('\n');
+};
+
 const ask = () => rl.question(`\n${c.cyan}${c.bold}You${c.reset} › `, { signal: ac.signal }, async (input) => {
   const trimmed = input.trim();
   if (!trimmed || trimmed.toLowerCase() === 'exit') {
@@ -59,14 +67,9 @@ const ask = () => rl.question(`\n${c.cyan}${c.bold}You${c.reset} › `, { signal
       stopWhen: stepCountIs(10),
     });
 
-    process.stdout.write(`\n${c.green}${c.bold}Agent${c.reset} › `);
-    for await (const chunk of result.textStream) {
-      process.stdout.write(chunk);
-    }
-    process.stdout.write('\n');
+    await streamResponse(result);
 
-    const text = await result.text;
-    history.push({ role: 'assistant', content: text });
+    history.push({ role: 'assistant', content: await result.text });
   } catch (err) {
     console.error(`\n${c.yellow}⚠ ${(err as Error).message}${c.reset}`);
   }
