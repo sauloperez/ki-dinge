@@ -20,12 +20,15 @@ export const describeTable = tool({
   description: 'Get column names, types, and nullability for a table',
   inputSchema: z.object({ tableName: z.string() }),
   execute: async ({ tableName }): Promise<DescribeTableResult> => {
+    const safeName = tableName.replace(/[^a-zA-Z0-9_]/g, '');
+    if (safeName !== tableName) return { error: 'Invalid table name.' };
+
     const tables = db.prepare<[string], TableRow>(
       "SELECT name FROM sqlite_master WHERE type='table' AND name=?"
     ).all(tableName);
     if (tables.length === 0) return { error: 'Table not found.' };
 
-    const info = db.prepare<[], PragmaRow>(`PRAGMA table_info(${tableName})`).all();
+    const info = db.prepare<[], PragmaRow>(`PRAGMA table_info("${safeName}")`).all();
     return {
       columns: info.map(col => ({
         name: col.name,

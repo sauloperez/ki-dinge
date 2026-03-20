@@ -78,6 +78,11 @@ describe('describeTable', () => {
     const result = await describeTable.execute!({ tableName: 'nonexistent' }, opts) as { error: string };
     expect(result).toHaveProperty('error');
   });
+
+  test('rejects table names containing special characters', async () => {
+    const result = await describeTable.execute!({ tableName: 'customers); DROP TABLE customers--' }, opts) as { error: string };
+    expect(result.error).toBe('Invalid table name.');
+  });
 });
 
 describe('runQuery', () => {
