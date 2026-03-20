@@ -3,13 +3,13 @@ import { existsSync } from 'fs';
 import { config } from 'dotenv';
 import { gateway, streamText, stepCountIs, type ModelMessage } from 'ai';
 import { describeTable, listTables, runQuery } from './tools.ts';
+import { streamResponse } from './stream.ts';
 
 const c = {
   reset: '\x1b[0m',
   bold: '\x1b[1m',
   dim: '\x1b[2m',
   cyan: '\x1b[36m',
-  green: '\x1b[32m',
   yellow: '\x1b[33m',
 };
 
@@ -41,14 +41,6 @@ rl.on('close', () => {
   process.exit(0);
 });
 
-const streamResponse = async (result: ReturnType<typeof streamText>) => {
-  process.stdout.write(`\n${c.green}${c.bold}Agent${c.reset} › `);
-  for await (const chunk of result.textStream) {
-    process.stdout.write(chunk);
-  }
-  process.stdout.write('\n');
-};
-
 const ask = () => rl.question(`\n${c.cyan}${c.bold}You${c.reset} › `, { signal: ac.signal }, async (input) => {
   const trimmed = input.trim();
   if (!trimmed || trimmed.toLowerCase() === 'exit') {
@@ -67,9 +59,8 @@ const ask = () => rl.question(`\n${c.cyan}${c.bold}You${c.reset} › `, { signal
       stopWhen: stepCountIs(10),
     });
 
-    await streamResponse(result);
-
-    history.push({ role: 'assistant', content: await result.text });
+    const assistantText = await streamResponse(result);
+    history.push({ role: 'assistant', content: assistantText });
   } catch (err) {
     console.error(`\n${c.yellow}⚠ ${(err as Error).message}${c.reset}`);
   }
