@@ -243,7 +243,7 @@ history.push({ role: 'assistant', content: text });
 
 **Steps:**
 
-- [ ] Import what you need:
+- [x] Import what you need:
   ```ts
   import { createInterface } from 'readline';
   import { existsSync } from 'fs';
@@ -251,7 +251,7 @@ history.push({ role: 'assistant', content: text });
   import { generateText, gateway, stepCountIs, CoreMessage } from 'ai';
   import { listTables, describeTable, runQuery } from './tools.js';
   ```
-- [ ] Load env and check for DB:
+- [x] Load env and check for DB:
   ```ts
   config();
 
@@ -260,7 +260,7 @@ history.push({ role: 'assistant', content: text });
     process.exit(1);
   }
   ```
-- [ ] Define the system prompt:
+- [x] Define the system prompt:
   ```ts
   const SYSTEM = `You are a data analyst assistant. You have access to a SQLite database.
 
@@ -271,7 +271,7 @@ history.push({ role: 'assistant', content: text });
   4. Format results clearly: prose for summaries, markdown tables for tabular data. Include units (e.g. $, count).
   5. If a query returns no rows, say so explicitly — never guess or hallucinate data.`;
   ```
-- [ ] Set up the REPL loop:
+- [x] Set up the REPL loop:
   ```ts
   const history: CoreMessage[] = [];
   const rl = createInterface({ input: process.stdin, output: process.stdout });
@@ -306,9 +306,9 @@ history.push({ role: 'assistant', content: text });
   console.log('Data Analyst Agent — type your question or "exit" to quit.');
   ask();
   ```
-- [ ] Run `pnpm typecheck` — fix any errors
-- [ ] Smoke test: `pnpm start` — ask "what tables are in the database?"
-- [ ] Commit: `feat: add REPL entry point`
+- [x] Run `pnpm typecheck` — fix any errors
+- [x] Smoke test: `pnpm start` — ask "what tables are in the database?"
+- [x] Commit: `feat: add REPL entry point`
 
 ---
 
@@ -318,7 +318,7 @@ history.push({ role: 'assistant', content: text });
 
 **Steps:**
 
-- [ ] Write a README following the monorepo convention. Include:
+- [x] Write a README following the monorepo convention. Include:
   - One-line description
   - How it works (tools, agentic loop, AI Gateway)
   - Prerequisites (`AI_GATEWAY_API_KEY`)
@@ -331,7 +331,7 @@ history.push({ role: 'assistant', content: text });
     ```
   - Example questions to try
 
-- [ ] Commit: `docs: add data-analyst README`
+- [x] Commit: `docs: add data-analyst README`
 
 ---
 

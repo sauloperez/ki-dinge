@@ -1,7 +1,7 @@
 import { createInterface } from 'readline';
 import { existsSync } from 'fs';
 import { config } from 'dotenv';
-import { gateway, generateText, stepCountIs, type ModelMessage } from 'ai';
+import { gateway, streamText, stepCountIs, type ModelMessage } from 'ai';
 import { describeTable, listTables, runQuery } from './tools.ts';
 
 const c = {
@@ -51,7 +51,7 @@ const ask = () => rl.question(`\n${c.cyan}${c.bold}You${c.reset} › `, { signal
   history.push({ role: 'user', content: trimmed });
 
   try {
-    const { text } = await generateText({
+    const result = streamText({
       model: gateway(model),
       system: SYSTEM_PROMPT,
       messages: history,
@@ -59,7 +59,13 @@ const ask = () => rl.question(`\n${c.cyan}${c.bold}You${c.reset} › `, { signal
       stopWhen: stepCountIs(10),
     });
 
-    console.log(`\n${c.green}${c.bold}Agent${c.reset} › ${text}`);
+    process.stdout.write(`\n${c.green}${c.bold}Agent${c.reset} › `);
+    for await (const chunk of result.textStream) {
+      process.stdout.write(chunk);
+    }
+    process.stdout.write('\n');
+
+    const text = await result.text;
     history.push({ role: 'assistant', content: text });
   } catch (err) {
     console.error(`\n${c.yellow}⚠ ${(err as Error).message}${c.reset}`);
