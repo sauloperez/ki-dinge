@@ -13,6 +13,10 @@ export class VirtualFS {
     this.knownPaths = new Set(paths);
   }
 
+  public list(): string[] {
+    return Array.from(this.knownPaths);
+  }
+
   public async read(path: string): Promise<string> {
     if (!this.knownPaths.has(path)) {
       throw new Error(`File not found: ${path}`);
