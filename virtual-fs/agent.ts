@@ -18,7 +18,7 @@ const c = {
 
 config();
 
-const vfs = VirtualFS.mount({ prefix: '', backend: new LocalBackend(process.cwd()) });
+const vfs = VirtualFS.mount({ prefix: '', backend: new LocalBackend(new URL('./data', import.meta.url).pathname) });
 
 const history: ModelMessage[] = [];
 
