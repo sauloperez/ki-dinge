@@ -1,26 +1,27 @@
 import { StorageBackend } from "./backend.ts";
 
+export interface MountOptions {
+  prefix: string;
+  backend: StorageBackend;
+}
+
 export class VirtualFS {
-  private backend: StorageBackend;
-  private knownPaths: Set<string> = new Set();
+  private constructor(
+    private readonly prefix: string,
+    private readonly backend: StorageBackend,
+  ) {}
 
-  constructor(backend: StorageBackend) {
-    this.backend = backend;
+  public static mount({ prefix, backend }: MountOptions): VirtualFS {
+    return new VirtualFS(prefix, backend);
   }
 
-  public async init() {
+  public async list(): Promise<string[]> {
     const paths = await this.backend.list();
-    this.knownPaths = new Set(paths);
-  }
-
-  public list(): string[] {
-    return Array.from(this.knownPaths);
+    return paths.map(p => this.prefix ? `${this.prefix}/${p}` : p);
   }
 
   public async read(path: string): Promise<string> {
-    if (!this.knownPaths.has(path)) {
-      throw new Error(`File not found: ${path}`);
-    }
-    return await this.backend.read(path);
+    const backendPath = this.prefix ? path.slice(this.prefix.length + 1) : path;
+    return await this.backend.read(backendPath);
   }
 }

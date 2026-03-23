@@ -1,12 +1,12 @@
 import { config } from 'dotenv';
 import { createInterface } from 'readline';
 import { openrouter } from '@openrouter/ai-sdk-provider';
-import { streamText, stepCountIs, tool, type ModelMessage } from 'ai';
-import { z } from 'zod';
+import { streamText, stepCountIs, type ModelMessage } from 'ai';
 import 'dotenv/config';
 import { streamResponse } from './stream.ts';
 import { LocalBackend } from './backends/local.ts';
 import { VirtualFS } from './vfs.ts';
+import { createVfsTools } from './tools.ts';
 
 const c = {
   reset: '\x1b[0m',
@@ -18,8 +18,7 @@ const c = {
 
 config();
 
-const vfs = new VirtualFS(new LocalBackend(process.cwd()));
-await vfs.init();
+const vfs = VirtualFS.mount({ prefix: '', backend: new LocalBackend(process.cwd()) });
 
 const history: ModelMessage[] = [];
 
@@ -46,18 +45,7 @@ const ask = () => rl.question(`\n${c.cyan}${c.bold}You${c.reset} › `, { signal
       model: openrouter('openrouter/free'),
       system: 'You are a helpful assistant.',
       messages: history,
-      tools: {
-        list_files: tool({
-          description: 'List all available files in the virtual filesystem',
-          inputSchema: z.object({}),
-          execute: async () => vfs.list(),
-        }),
-        read_file: tool({
-          description: 'Read the contents of a file by its path',
-          inputSchema: z.object({ path: z.string().describe('The file path to read') }),
-          execute: async ({ path }) => vfs.read(path),
-        }),
-      },
+      tools: createVfsTools(vfs),
       stopWhen: stepCountIs(5),
     });
 
