@@ -37,4 +37,27 @@ describe('createVfsTools', () => {
 
     await expect(tools.read_file.execute!({ path: 'missing.ts' }, {} as never)).rejects.toThrow();
   });
+
+  it('grep_file returns matching lines with line numbers', async () => {
+    const vfs = VirtualFS.mount({ prefix: '', backend: makeBackend({
+      'orders.ts': 'function createOrder() {}\nfunction cancelOrder() {}\nfunction updateStatus() {}',
+    }) });
+    const tools = createVfsTools(vfs);
+
+    const result = await tools.grep_file.execute!({ path: 'orders.ts', regex: 'Order' }, {} as never);
+
+    expect(result).toEqual([
+      { line: 1, text: 'function createOrder() {}' },
+      { line: 2, text: 'function cancelOrder() {}' },
+    ]);
+  });
+
+  it('grep_file returns empty array when nothing matches', async () => {
+    const vfs = VirtualFS.mount({ prefix: '', backend: makeBackend({ 'foo.ts': 'const x = 1;' }) });
+    const tools = createVfsTools(vfs);
+
+    const result = await tools.grep_file.execute!({ path: 'foo.ts', regex: 'nomatch' }, {} as never);
+
+    expect(result).toEqual([]);
+  });
 });

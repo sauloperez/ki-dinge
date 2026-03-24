@@ -24,4 +24,11 @@ export class VirtualFS {
     const backendPath = this.prefix ? path.slice(this.prefix.length + 1) : path;
     return await this.backend.read(backendPath);
   }
+
+  public async grep(path: string, regex: RegExp): Promise<{ line: number; text: string }[]> {
+    const content = await this.read(path);
+    return content
+      .split('\n')
+      .flatMap((text, i) => regex.test(text) ? [{ line: i + 1, text }] : []);
+  }
 }

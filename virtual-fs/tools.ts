@@ -14,5 +14,13 @@ export function createVfsTools(vfs: VirtualFS) {
       inputSchema: z.object({ path: z.string().describe('The file path to read') }),
       execute: async ({ path }) => vfs.read(path),
     }),
+    grep_file: tool({
+      description: 'Search a file for lines matching a regex pattern. Returns matching lines with their line numbers.',
+      inputSchema: z.object({
+        path: z.string().describe('The file path to search'),
+        regex: z.string().describe('Regular expression pattern to match against each line'),
+      }),
+      execute: async ({ path, regex }) => vfs.grep(path, new RegExp(regex)),
+    }),
   };
 }
