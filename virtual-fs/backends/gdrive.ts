@@ -48,8 +48,9 @@ export class GDriveBackend implements StorageBackend {
   }
 
   private async resolveFolderSegment(name: string, parentId: string): Promise<string> {
+    const escapedName = name.replace(/'/g, "\\'");
     const res = await this.drive!.files.list({
-      q: `name = '${name}' and '${parentId}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
+      q: `name = '${escapedName}' and '${parentId}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
       fields: 'files(id, name)',
       pageSize: 1,
     });
