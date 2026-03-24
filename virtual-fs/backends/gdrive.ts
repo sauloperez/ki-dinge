@@ -26,8 +26,40 @@ export class GDriveBackend implements StorageBackend {
     });
 
     this.drive = google.drive({ version: 'v3', auth });
-    // Folder walking will be added in later tasks
+
+    const rootId = await this.resolveRootPath();
+    await this.buildCache(rootId, '');
+
     this.initialized = true;
+  }
+
+  private async resolveRootPath(): Promise<string> {
+    const segments = this.options.rootFolderPath.split('/');
+    // "My Drive" is the user's root — mapped to 'root' alias in Drive API
+    if (segments[0] !== 'My Drive') {
+      throw new Error("rootFolderPath must start with 'My Drive'");
+    }
+
+    let currentId = 'root';
+    for (const segment of segments.slice(1)) {
+      currentId = await this.resolveFolderSegment(segment, currentId);
+    }
+    return currentId;
+  }
+
+  private async resolveFolderSegment(name: string, parentId: string): Promise<string> {
+    const res = await this.drive!.files.list({
+      q: `name = '${name}' and '${parentId}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
+      fields: 'files(id, name)',
+      pageSize: 1,
+    });
+    const file = res.data.files?.[0];
+    if (!file?.id) throw new Error(`Folder not found: '${name}'`);
+    return file.id;
+  }
+
+  private async buildCache(folderId: string, pathPrefix: string): Promise<void> {
+    // Placeholder — implemented in Task 4
   }
 
   async list(path?: string): Promise<string[]> {
