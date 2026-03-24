@@ -11,6 +11,7 @@
     "@openrouter/ai-sdk-provider": "^2.3.3",
     "ai": "^6.0.0",
     "dotenv": "^16.0.0",
+    "googleapis": "^171.4.0",
     "zod": "^3.0.0"
   },
   "devDependencies": {
@@ -19,6 +20,8 @@
     "vitest": "^3.0.0"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["esbuild"]
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
   }
 }
