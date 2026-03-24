@@ -60,12 +60,45 @@ export class GDriveBackend implements StorageBackend {
   }
 
   private async buildCache(folderId: string, pathPrefix: string): Promise<void> {
-    // Placeholder — implemented in Task 4
+    let pageToken: string | undefined;
+
+    do {
+      const res = await this.drive!.files.list({
+        q: `'${folderId}' in parents and trashed = false`,
+        fields: 'nextPageToken, files(id, name, mimeType)',
+        pageSize: 1000,
+        pageToken,
+      });
+
+      const files = res.data.files ?? [];
+      for (const file of files) {
+        if (!file.id || !file.name) continue;
+        const filePath = pathPrefix ? `${pathPrefix}/${file.name}` : file.name;
+        this.cache.set(filePath, file.id);
+        if (file.mimeType === 'application/vnd.google-apps.folder') {
+          await this.buildCache(file.id, filePath);
+        }
+      }
+
+      pageToken = res.data.nextPageToken ?? undefined;
+    } while (pageToken);
   }
 
   async list(path?: string): Promise<string[]> {
     await this.init();
-    return [];
+
+    const prefix = path ? `${path}/` : '';
+    const results: string[] = [];
+
+    for (const key of this.cache.keys()) {
+      if (!key.startsWith(prefix)) continue;
+      const remainder = key.slice(prefix.length);
+      if (!remainder.includes('/')) {
+        results.push(remainder);
+      }
+    }
+
+    return results;
   }
 
   async read(path: string): Promise<string> {

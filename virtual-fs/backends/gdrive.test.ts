@@ -99,3 +99,69 @@ describe('GDriveBackend — root path resolution', () => {
     await expect(backend.list()).rejects.toThrow("Folder not found: 'nonexistent'");
   });
 });
+
+describe('GDriveBackend — cache building', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('populates cache with files at the root level', async () => {
+    const mockList = vi.mocked(google.drive({} as any).files.list);
+    // Root walk: returns one file
+    mockList.mockResolvedValue({
+      data: {
+        files: [{ id: 'file-1', name: 'README.md', mimeType: 'text/plain' }],
+        nextPageToken: undefined,
+      },
+    } as any);
+
+    const backend = new GDriveBackend({ keyFile: '/fake/key.json', rootFolderPath: 'My Drive' });
+    const files = await backend.list();
+
+    expect(files).toContain('README.md');
+  });
+
+  it('recursively indexes files in subfolders', async () => {
+    const mockList = vi.mocked(google.drive({} as any).files.list);
+    mockList
+      // Root level: one folder
+      .mockResolvedValueOnce({
+        data: { files: [{ id: 'folder-src', name: 'src', mimeType: 'application/vnd.google-apps.folder' }], nextPageToken: undefined },
+      } as any)
+      // src folder contents: one file
+      .mockResolvedValueOnce({
+        data: { files: [{ id: 'file-agent', name: 'agent.ts', mimeType: 'text/plain' }], nextPageToken: undefined },
+      } as any);
+
+    const backend = new GDriveBackend({ keyFile: '/fake/key.json', rootFolderPath: 'My Drive' });
+    await backend.list();
+
+    // After init, list('src') should return agent.ts
+    // Note: initialized is already true after first list(), so second list('src') reads from cache directly
+    const files = await backend.list('src');
+    expect(files).toContain('agent.ts');
+  });
+
+  it('handles paginated results', async () => {
+    const mockList = vi.mocked(google.drive({} as any).files.list);
+    mockList
+      .mockResolvedValueOnce({
+        data: {
+          files: [{ id: 'file-1', name: 'a.ts', mimeType: 'text/plain' }],
+          nextPageToken: 'page2',
+        },
+      } as any)
+      .mockResolvedValueOnce({
+        data: {
+          files: [{ id: 'file-2', name: 'b.ts', mimeType: 'text/plain' }],
+          nextPageToken: undefined,
+        },
+      } as any);
+
+    const backend = new GDriveBackend({ keyFile: '/fake/key.json', rootFolderPath: 'My Drive' });
+    const files = await backend.list();
+
+    expect(files).toContain('a.ts');
+    expect(files).toContain('b.ts');
+  });
+});
