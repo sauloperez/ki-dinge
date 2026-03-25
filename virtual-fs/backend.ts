@@ -1,4 +1,4 @@
 export interface StorageBackend {
-  list(): Promise<string[]>;
+  list(path?: string): Promise<string[]>;
   read(path: string): Promise<string>;
 }
