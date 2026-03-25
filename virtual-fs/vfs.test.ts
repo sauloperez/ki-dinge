@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { VirtualFS } from './vfs.ts';
+import { LocalBackend } from './backends/local.ts';
 
 function makeBackend(files: Record<string, string>) {
   return {
@@ -30,6 +31,32 @@ describe('list()', () => {
     const vfs = VirtualFS.mount({ prefix: '/src', backend: makeBackend({ 'agent.ts': '' }) });
 
     expect(await vfs.list()).toEqual(['/src/agent.ts']);
+  });
+
+  it('strips the prefix before forwarding path to the backend', async () => {
+    let receivedPath: string | undefined;
+    const vfs = VirtualFS.mount({
+      prefix: '/src',
+      backend: {
+        list: async (path) => { receivedPath = path; return []; },
+        read: async (_: string) => '',
+      },
+    });
+    await vfs.list('/src/dir');
+
+    expect(receivedPath).toBe('dir');
+  });
+
+  it('applies the prefix to results when a path is provided', async () => {
+    const vfs = VirtualFS.mount({
+      prefix: '/src',
+      backend: {
+        list: async (_path) => ['dir/agent.ts'],
+        read: async (_: string) => '',
+      },
+    });
+
+    expect(await vfs.list('/src/dir')).toEqual(['/src/dir/agent.ts']);
   });
 });
 

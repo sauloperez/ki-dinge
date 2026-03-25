@@ -9,14 +9,15 @@ export class VirtualFS {
   private constructor(
     private readonly prefix: string,
     private readonly backend: StorageBackend,
-  ) {}
+  ) { }
 
   public static mount({ prefix, backend }: MountOptions): VirtualFS {
     return new VirtualFS(prefix, backend);
   }
 
-  public async list(): Promise<string[]> {
-    const paths = await this.backend.list();
+  public async list(path?: string): Promise<string[]> {
+    const backendPath = path !== undefined && this.prefix ? path.slice(this.prefix.length + 1) : path;
+    const paths = await this.backend.list(backendPath);
     return paths.map(p => this.prefix ? `${this.prefix}/${p}` : p);
   }
 
