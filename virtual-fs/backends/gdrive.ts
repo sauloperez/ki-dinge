@@ -11,6 +11,7 @@ export class GDriveBackend implements StorageBackend {
   private options: GDriveOptions;
   private drive: drive_v3.Drive | null = null;
   private cache: Map<string, string> = new Map(); // readable path → file ID
+  private folders: Set<string> = new Set(); // paths that are folders
   private initialized = false;
 
   constructor(options: GDriveOptions) {
@@ -76,6 +77,7 @@ export class GDriveBackend implements StorageBackend {
         const filePath = pathPrefix ? `${pathPrefix}/${file.name}` : file.name;
         this.cache.set(filePath, file.id);
         if (file.mimeType === 'application/vnd.google-apps.folder') {
+          this.folders.add(filePath);
           await this.buildCache(file.id, filePath);
         }
       }
@@ -86,6 +88,11 @@ export class GDriveBackend implements StorageBackend {
 
   async list(path?: string): Promise<string[]> {
     await this.init();
+
+    if (path !== undefined) {
+      if (!this.cache.has(path)) throw new Error(`Path not found: '${path}'`);
+      if (!this.folders.has(path)) throw new Error(`Not a folder: '${path}'`);
+    }
 
     const prefix = path ? `${path}/` : '';
     const results: string[] = [];
@@ -103,6 +110,15 @@ export class GDriveBackend implements StorageBackend {
 
   async read(path: string): Promise<string> {
     await this.init();
-    throw new Error(`File not found: ${path}`);
+
+    const fileId = this.cache.get(path);
+    if (!fileId) throw new Error(`File not found: '${path}'`);
+
+    const res = await this.drive!.files.get(
+      { fileId, alt: 'media' },
+      { responseType: 'text' }
+    );
+
+    return res.data as string;
   }
 }

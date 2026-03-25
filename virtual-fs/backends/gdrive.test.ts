@@ -1,13 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
+const mockDrive = vi.hoisted(() => ({
+  files: {
+    list: vi.fn(),
+    get: vi.fn(),
+  },
+}));
+
 // We'll mock googleapis before importing our module
 vi.mock('googleapis', () => {
-  const mockDrive = {
-    files: {
-      list: vi.fn(),
-      get: vi.fn(),
-    },
-  };
   return {
     google: {
       auth: {
@@ -23,21 +24,21 @@ vi.mock('googleapis', () => {
 import { google } from 'googleapis';
 import { GDriveBackend } from './gdrive.ts';
 
-describe('GDriveBackend — auth', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
+beforeEach(() => {
+  mockDrive.files.list.mockReset();
+  mockDrive.files.get.mockReset();
+  vi.mocked(google.auth.GoogleAuth).mockClear();
+});
 
+describe('GDriveBackend — auth', () => {
   it('creates a GoogleAuth with drive.readonly scope', async () => {
-    const mockList = vi.mocked(google.drive({} as any).files.list);
-    mockList.mockResolvedValue({ data: { files: [] } } as any);
+    mockDrive.files.list.mockResolvedValue({ data: { files: [] } });
 
     const backend = new GDriveBackend({
       keyFile: '/fake/key.json',
       rootFolderPath: 'My Drive',
     });
 
-    // Trigger initialization
     await backend.list();
 
     expect(google.auth.GoogleAuth).toHaveBeenCalledWith({
@@ -48,13 +49,8 @@ describe('GDriveBackend — auth', () => {
 });
 
 describe('GDriveBackend — root path resolution', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   it('resolves a single-segment root path using the Drive root alias', async () => {
-    const mockList = vi.mocked(google.drive({} as any).files.list);
-    mockList.mockResolvedValue({ data: { files: [] } } as any);
+    mockDrive.files.list.mockResolvedValue({ data: { files: [] } });
 
     const backend = new GDriveBackend({
       keyFile: '/fake/key.json',
@@ -63,17 +59,15 @@ describe('GDriveBackend — root path resolution', () => {
 
     await backend.list();
 
-    // "My Drive" alone should not call files.list — it maps to 'root'
-    expect(mockList).not.toHaveBeenCalledWith(
+    expect(mockDrive.files.list).not.toHaveBeenCalledWith(
       expect.objectContaining({ q: expect.stringContaining("name = 'My Drive'") })
     );
   });
 
   it('resolves a multi-segment root path by querying each folder name', async () => {
-    const mockList = vi.mocked(google.drive({} as any).files.list);
-    mockList
-      .mockResolvedValueOnce({ data: { files: [{ id: 'folder-projects', name: 'projects', mimeType: 'application/vnd.google-apps.folder' }] } } as any)
-      .mockResolvedValue({ data: { files: [] } } as any);
+    mockDrive.files.list
+      .mockResolvedValueOnce({ data: { files: [{ id: 'folder-projects', name: 'projects', mimeType: 'application/vnd.google-apps.folder' }] } })
+      .mockResolvedValue({ data: { files: [] } });
 
     const backend = new GDriveBackend({
       keyFile: '/fake/key.json',
@@ -82,14 +76,13 @@ describe('GDriveBackend — root path resolution', () => {
 
     await backend.list();
 
-    expect(mockList).toHaveBeenCalledWith(expect.objectContaining({
+    expect(mockDrive.files.list).toHaveBeenCalledWith(expect.objectContaining({
       q: expect.stringContaining("name = 'projects'"),
     }));
   });
 
   it('throws if a path segment is not found', async () => {
-    const mockList = vi.mocked(google.drive({} as any).files.list);
-    mockList.mockResolvedValue({ data: { files: [] } } as any);
+    mockDrive.files.list.mockResolvedValue({ data: { files: [] } });
 
     const backend = new GDriveBackend({
       keyFile: '/fake/key.json',
@@ -101,19 +94,13 @@ describe('GDriveBackend — root path resolution', () => {
 });
 
 describe('GDriveBackend — cache building', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   it('populates cache with files at the root level', async () => {
-    const mockList = vi.mocked(google.drive({} as any).files.list);
-    // Root walk: returns one file
-    mockList.mockResolvedValue({
+    mockDrive.files.list.mockResolvedValue({
       data: {
         files: [{ id: 'file-1', name: 'README.md', mimeType: 'text/plain' }],
         nextPageToken: undefined,
       },
-    } as any);
+    });
 
     const backend = new GDriveBackend({ keyFile: '/fake/key.json', rootFolderPath: 'My Drive' });
     const files = await backend.list();
@@ -122,46 +109,131 @@ describe('GDriveBackend — cache building', () => {
   });
 
   it('recursively indexes files in subfolders', async () => {
-    const mockList = vi.mocked(google.drive({} as any).files.list);
-    mockList
-      // Root level: one folder
+    mockDrive.files.list
       .mockResolvedValueOnce({
         data: { files: [{ id: 'folder-src', name: 'src', mimeType: 'application/vnd.google-apps.folder' }], nextPageToken: undefined },
-      } as any)
-      // src folder contents: one file
+      })
       .mockResolvedValueOnce({
         data: { files: [{ id: 'file-agent', name: 'agent.ts', mimeType: 'text/plain' }], nextPageToken: undefined },
-      } as any);
+      });
 
     const backend = new GDriveBackend({ keyFile: '/fake/key.json', rootFolderPath: 'My Drive' });
     await backend.list();
 
-    // After init, list('src') should return agent.ts
-    // Note: initialized is already true after first list(), so second list('src') reads from cache directly
     const files = await backend.list('src');
     expect(files).toContain('agent.ts');
   });
 
   it('handles paginated results', async () => {
-    const mockList = vi.mocked(google.drive({} as any).files.list);
-    mockList
+    mockDrive.files.list
       .mockResolvedValueOnce({
         data: {
           files: [{ id: 'file-1', name: 'a.ts', mimeType: 'text/plain' }],
           nextPageToken: 'page2',
         },
-      } as any)
+      })
       .mockResolvedValueOnce({
         data: {
           files: [{ id: 'file-2', name: 'b.ts', mimeType: 'text/plain' }],
           nextPageToken: undefined,
         },
-      } as any);
+      });
 
     const backend = new GDriveBackend({ keyFile: '/fake/key.json', rootFolderPath: 'My Drive' });
     const files = await backend.list();
 
     expect(files).toContain('a.ts');
     expect(files).toContain('b.ts');
+  });
+});
+
+describe('GDriveBackend — list() validation', () => {
+  it('lists root-level names when called without a path', async () => {
+    // First call returns root contents (including a folder that triggers recursive buildCache)
+    // Fallback: empty so the recursive call for 'src' terminates immediately
+    mockDrive.files.list
+      .mockResolvedValueOnce({
+        data: {
+          files: [
+            { id: 'file-readme', name: 'README.md', mimeType: 'text/plain' },
+            { id: 'folder-src', name: 'src', mimeType: 'application/vnd.google-apps.folder' },
+          ],
+          nextPageToken: undefined,
+        },
+      })
+      .mockResolvedValue({ data: { files: [], nextPageToken: undefined } });
+
+    const backend = new GDriveBackend({ keyFile: '/fake/key.json', rootFolderPath: 'My Drive' });
+    const files = await backend.list();
+
+    expect(files).toEqual(expect.arrayContaining(['README.md', 'src']));
+  });
+
+  it('lists direct children of a subfolder by path', async () => {
+    mockDrive.files.list
+      .mockResolvedValueOnce({
+        data: {
+          files: [{ id: 'folder-src', name: 'src', mimeType: 'application/vnd.google-apps.folder' }],
+          nextPageToken: undefined,
+        },
+      })
+      .mockResolvedValueOnce({
+        data: {
+          files: [{ id: 'file-agent', name: 'agent.ts', mimeType: 'text/plain' }],
+          nextPageToken: undefined,
+        },
+      });
+
+    const backend = new GDriveBackend({ keyFile: '/fake/key.json', rootFolderPath: 'My Drive' });
+    const files = await backend.list('src');
+
+    expect(files).toEqual(['agent.ts']);
+  });
+
+  it('throws when the path does not exist in the cache', async () => {
+    mockDrive.files.list.mockResolvedValue({ data: { files: [], nextPageToken: undefined } });
+
+    const backend = new GDriveBackend({ keyFile: '/fake/key.json', rootFolderPath: 'My Drive' });
+
+    await expect(backend.list('nonexistent')).rejects.toThrow("Path not found: 'nonexistent'");
+  });
+
+  it('throws when path points to a file, not a folder', async () => {
+    mockDrive.files.list.mockResolvedValue({
+      data: {
+        files: [{ id: 'file-readme', name: 'README.md', mimeType: 'text/plain' }],
+        nextPageToken: undefined,
+      },
+    });
+
+    const backend = new GDriveBackend({ keyFile: '/fake/key.json', rootFolderPath: 'My Drive' });
+
+    await expect(backend.list('README.md')).rejects.toThrow("Not a folder: 'README.md'");
+  });
+});
+
+describe('GDriveBackend — read()', () => {
+  it('fetches file content by readable path', async () => {
+    mockDrive.files.list.mockResolvedValue({
+      data: { files: [{ id: 'file-readme', name: 'README.md', mimeType: 'text/plain' }], nextPageToken: undefined },
+    });
+    mockDrive.files.get.mockResolvedValue({ data: '# Hello World' });
+
+    const backend = new GDriveBackend({ keyFile: '/fake/key.json', rootFolderPath: 'My Drive' });
+    const content = await backend.read('README.md');
+
+    expect(mockDrive.files.get).toHaveBeenCalledWith(
+      expect.objectContaining({ fileId: 'file-readme', alt: 'media' }),
+      expect.objectContaining({ responseType: 'text' })
+    );
+    expect(content).toBe('# Hello World');
+  });
+
+  it('throws when the path does not exist in the cache', async () => {
+    mockDrive.files.list.mockResolvedValue({ data: { files: [], nextPageToken: undefined } });
+
+    const backend = new GDriveBackend({ keyFile: '/fake/key.json', rootFolderPath: 'My Drive' });
+
+    await expect(backend.read('missing.ts')).rejects.toThrow("File not found: 'missing.ts'");
   });
 });
