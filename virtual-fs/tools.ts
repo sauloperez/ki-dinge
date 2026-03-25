@@ -17,9 +17,9 @@ function logged<TInput, TOutput>(
 export function createVfsTools(vfs: VirtualFS) {
   return {
     list_files: tool({
-      description: 'List all available files in the virtual filesystem',
-      inputSchema: z.object({}),
-      execute: logged('list_files', async () => vfs.list()),
+      description: 'List all files in a folder returning their paths',
+      inputSchema: z.object({ path: z.string().describe('The folder path to list files from').optional() }),
+      execute: logged('list_files', async ({ path }: { path?: string }) => vfs.list(path)),
     }),
     read_file: tool({
       description: 'Read the contents of a file by its path',
