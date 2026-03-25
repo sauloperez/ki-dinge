@@ -5,6 +5,7 @@ import { streamText, stepCountIs, type ModelMessage } from 'ai';
 import 'dotenv/config';
 import { streamResponse } from './stream.ts';
 import { LocalBackend } from './backends/local.ts';
+import { GDriveBackend } from './backends/gdrive.ts';
 import { VirtualFS } from './vfs.ts';
 import { createVfsTools } from './tools.ts';
 
@@ -18,7 +19,14 @@ const c = {
 
 config();
 
-const vfs = VirtualFS.mount({ prefix: '', backend: new LocalBackend(new URL('./data', import.meta.url).pathname) });
+const backend = process.env.GDRIVE_KEY_FILE && process.env.GDRIVE_ROOT_FOLDER_PATH
+  ? new GDriveBackend({
+      keyFile: process.env.GDRIVE_KEY_FILE,
+      rootFolderPath: process.env.GDRIVE_ROOT_FOLDER_PATH,
+    })
+  : new LocalBackend(new URL('./data', import.meta.url).pathname);
+
+const vfs = VirtualFS.mount({ prefix: '', backend });
 
 const history: ModelMessage[] = [];
 
