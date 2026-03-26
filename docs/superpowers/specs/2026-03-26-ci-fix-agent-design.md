@@ -1,5 +1,7 @@
 # CI Fix Agent — Design Spec
 
+Date: 2026-03-26
+
 An autonomous AI agent that diagnoses and fixes CI failures from CircleCI for any internal project.
 
 ## Overview
@@ -11,7 +13,14 @@ This is a PoC intended for internal use at JOIN. It showcases an autonomous agen
 ### Invocation
 
 ```bash
+# With real CI (future)
 npx tsx ci-fix/index.ts --repo org/repo --branch feature-branch [--build 1234]
+
+# With mock fixtures (PoC)
+npx tsx ci-fix/index.ts --repo org/repo --branch feature-branch --scenario test-failure
+
+# Dry run (skip GitHub write operations)
+npx tsx ci-fix/index.ts --repo org/repo --branch feature-branch --scenario lint-error --dry-run
 ```
 
 | Flag | Required | Description |
@@ -19,6 +28,8 @@ npx tsx ci-fix/index.ts --repo org/repo --branch feature-branch [--build 1234]
 | `--repo` | Yes | GitHub org/repo identifier |
 | `--branch` | Yes | Branch with the failing CI |
 | `--build` | No | Specific CircleCI build number. If omitted, fetches the latest failed build for the branch. |
+| `--scenario` | No | Use mock fixture data instead of real CI. Values: `test-failure`, `lint-error`. |
+| `--dry-run` | No | Run the full agent loop but skip GitHub write operations (PR creation, commenting). Prints what it would do instead. |
 
 ### What it does
 
@@ -39,6 +50,9 @@ npx tsx ci-fix/index.ts --repo org/repo --branch feature-branch [--build 1234]
 - Build/compilation failures
 - Infrastructure/flaky failures (timeouts, network errors)
 - CircleCI config issues
+- Monorepos with multiple CI configs
+- Private npm registries inside the sandbox
+- Web UI or persistent state across runs
 
 ## Architecture
 
@@ -61,11 +75,9 @@ Agent Loop (Vercel AI SDK streamText)
   │   └── run_command
   │
   └── GitHub Tools ──► @github-tools/sdk (PAT auth)
-      ├── getFileContent
       ├── listPullRequests
       ├── createPullRequest
-      ├── addPullRequestComment
-      └── createOrUpdateFile
+      └── addPullRequestComment
 ```
 
 The agent loop combines all tools:
@@ -94,7 +106,7 @@ Mock-backed tools returning fixture data. Same interface that a future CircleCI 
 |------|--------|---------|
 | `get_pipeline_status` | `repo`, `branch` | List of jobs with status (passed/failed) and job IDs |
 | `get_job_logs` | `jobId` | Raw log output (truncated to relevant failure section) |
-| `get_test_results` | `jobId` | Structured array: `{ file, testName, error, stackTrace }` |
+| `get_test_results` | `jobId` | Structured array: `{ file, testName, error, stackTrace }`. Returns empty array with a message for non-test jobs (e.g., lint). |
 
 ### Sandbox Tools — `createSandboxTools()`
 
@@ -113,11 +125,11 @@ Execute inside the Docker container via `docker exec`.
 Cherry-picked from [vercel-labs/github-tools](https://github.com/vercel-labs/github-tools). Configured in `tools/github-tools.ts` with PAT auth.
 
 Tools used:
-- `getFileContent` — read repo files
 - `listPullRequests` — find existing PR for a branch
 - `createPullRequest` — open fix PRs
 - `addPullRequestComment` — comment on original PR
-- `createOrUpdateFile` — commit file changes
+
+Code reading and modification happen via sandbox tools (the agent works inside the Docker container). Git commit and push also happen inside the container. GitHub tools are only used for PR operations.
 
 ## Docker Sandbox
 
@@ -157,11 +169,20 @@ The system prompt instructs the agent with a clear workflow:
 - Make minimal changes — don't refactor unrelated code
 - If validation fails after 3 attempts, stop and report what was tried
 - Always explain the root cause in the PR description and comment
-- `maxSteps: 25` as a safety cap on the agent loop
+- `maxSteps: 25` as a safety cap on the agent loop (higher than typical PoCs because the workflow spans diagnose → fix → validate → submit, each requiring multiple tool calls)
 
 ### Output
 
 The CLI streams the agent's reasoning to stdout so the person demoing can narrate what's happening in real time.
+
+## Error Handling
+
+- **Docker not available**: CLI checks for Docker daemon at startup. Exits with a clear error message if Docker is not running or not installed.
+- **Container failures**: If the container crashes or `docker exec` fails, the agent reports the error and tears down the container. No retry — the user re-runs.
+- **Auth failures**: If `GITHUB_TOKEN` is missing or invalid, CLI exits before starting the agent loop. Invalid token detected on first GitHub API call.
+- **LLM errors**: Vercel AI SDK handles retries for transient errors. If the LLM is unreachable or rate-limited after retries, the agent exits with the error.
+- **Validation loop**: If the fix doesn't pass validation after 3 attempts, the agent stops and outputs a summary of what it tried and why it failed. It does not open a PR.
+- **Fixture not found**: If `--scenario` points to a nonexistent fixture directory, CLI exits with available options listed.
 
 ## Demo Scenarios
 
@@ -202,12 +223,13 @@ ci-fix/
 │   ├── test-failure/        — scenario A data
 │   └── lint-error/          — scenario B data
 ├── package.json
-└── tsconfig.json
+├── tsconfig.json
+└── README.md
 ```
 
 ## Tech Stack
 
-- **Runtime**: TypeScript via `tsx`
+- **Runtime**: TypeScript via `tsx` (tsconfig follows repo convention: `allowImportingTsExtensions: true`, `noEmit: true`, `.ts` imports)
 - **Agent framework**: Vercel AI SDK (`streamText`, tools)
 - **LLM**: Via Vercel AI Gateway (configurable model, default Claude Sonnet)
 - **GitHub**: `@github-tools/sdk` (cherry-picked tools, PAT auth)
