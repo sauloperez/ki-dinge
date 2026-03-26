@@ -644,11 +644,11 @@ git commit -m "feat(ci-fix): implement Docker sandbox tools (read/write/search/l
 - Create: `ci-fix/tools/github-tools.ts`
 - Create: `ci-fix/tools/github-tools.test.ts`
 
-- [ ] **Step 1: Inspect `@github-tools/sdk` API**
+- [x] **Step 1: Inspect `@github-tools/sdk` API**
 
 Run: `cd ci-fix && node -e "const m = require('@github-tools/sdk'); console.log(Object.keys(m));"` or check `node_modules/@github-tools/sdk/dist/index.d.ts` to confirm the actual export names (`createGithubTools`, tool names). Adapt the code in Step 3 to match.
 
-- [ ] **Step 2: Write the failing test**
+- [x] **Step 2: Write the failing test**
 
 ```ts
 // ci-fix/tools/github-tools.test.ts
@@ -670,12 +670,12 @@ describe('createGitHubTools', () => {
 });
 ```
 
-- [ ] **Step 3: Run test to verify it fails**
+- [x] **Step 3: Run test to verify it fails**
 
 Run: `cd ci-fix && pnpm test -- tools/github-tools.test.ts`
 Expected: FAIL — module not found
 
-- [ ] **Step 4: Implement createGitHubTools**
+- [x] **Step 4: Implement createGitHubTools**
 
 Note: The exact implementation depends on the `@github-tools/sdk` API. Inspect the package after install and adapt. The structure below is the intended shape — adjust imports and API calls to match the actual SDK.
 
@@ -751,12 +751,12 @@ function createDryRunTools() {
 
 **Important:** After `pnpm install`, check the actual `@github-tools/sdk` exports. The `createGithubTools` function and tool names may differ. Read the package's types or README to confirm. Adapt the cherry-pick accordingly.
 
-- [ ] **Step 5: Run tests to verify they pass**
+- [x] **Step 5: Run tests to verify they pass**
 
 Run: `cd ci-fix && pnpm test -- tools/github-tools.test.ts`
 Expected: All tests PASS
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add ci-fix/tools/github-tools.ts ci-fix/tools/github-tools.test.ts
@@ -770,7 +770,7 @@ git commit -m "feat(ci-fix): implement GitHub tools with dry-run support"
 **Files:**
 - Create: `ci-fix/system-prompt.ts`
 
-- [ ] **Step 1: Create system-prompt.ts**
+- [x] **Step 1: Create system-prompt.ts**
 
 ```ts
 // ci-fix/system-prompt.ts
@@ -818,7 +818,7 @@ Follow these steps in order:
 `;
 ```
 
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
 ```bash
 git add ci-fix/system-prompt.ts
