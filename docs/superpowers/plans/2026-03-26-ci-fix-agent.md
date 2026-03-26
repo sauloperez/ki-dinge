@@ -831,6 +831,7 @@ git commit -m "feat(ci-fix): add agent system prompt"
 
 **Files:**
 - Create: `ci-fix/agent.ts`
+- Create: `ci-fix/agent.test.ts`
 
 - [ ] **Step 1: Create agent.ts**
 
@@ -865,10 +866,30 @@ export async function runAgent({ model, tools, repo, branch }: AgentConfig): Pro
 }
 ```
 
-- [ ] **Step 2: Commit**
+- [ ] **Step 2: Write a structural test for agent.ts**
+
+```ts
+// ci-fix/agent.test.ts
+import { describe, it, expect, vi } from 'vitest';
+
+// Verify the module exports the expected function with the right shape
+describe('agent', () => {
+  it('exports runAgent as an async function', async () => {
+    const { runAgent } = await import('./agent.ts');
+    expect(typeof runAgent).toBe('function');
+  });
+});
+```
+
+- [ ] **Step 3: Run test to verify it passes**
+
+Run: `cd ci-fix && pnpm test -- agent.test.ts`
+Expected: PASS
+
+- [ ] **Step 4: Commit**
 
 ```bash
-git add ci-fix/agent.ts
+git add ci-fix/agent.ts ci-fix/agent.test.ts
 git commit -m "feat(ci-fix): implement agent loop with streamText"
 ```
 
