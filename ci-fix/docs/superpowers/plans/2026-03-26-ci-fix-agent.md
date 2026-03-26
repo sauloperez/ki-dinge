@@ -1098,13 +1098,13 @@ git commit -m "fix(ci-fix): address issues from smoke testing"
 **Files:**
 - Create: `ci-fix/README.md`
 
-- [ ] **Step 1: Write README.md**
+- [x] **Step 1: Write README.md**
 
 Cover: overview, how it works, architecture diagram, usage instructions, environment variables, demo scenarios, evolution path.
 
 Follow the existing PoC README pattern from `data-analyst/README.md` or `git-assistant/README.md`.
 
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
 ```bash
 git add ci-fix/README.md

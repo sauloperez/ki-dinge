@@ -11,3 +11,7 @@
 2026-03-26: Task 8 (Agent Loop) — COMPLETE. Created agent.ts and agent.test.ts. Implements runAgent function using streamText with gateway model, system prompt, and tool forwarding. Adapted plan from AI SDK v3 (maxSteps) to current version (stopWhen: stepCountIs(25)). Structural test passes, typecheck clean.
 
 2026-03-26: Task 9 (CLI Entry Point) — COMPLETE. Created index.ts with CLI arg parsing (--repo, --branch, --scenario, --build, --dry-run), preflight checks (Docker, AI_GATEWAY_API_KEY, GITHUB_TOKEN), scenario fixture validation, sandbox lifecycle with SIGINT cleanup, tool assembly, and agent invocation. Used non-null assertions for repo/branch after validation guards. Typecheck clean. All non-Docker tests pass (12 passed, 5 skipped Docker tests).
+
+2026-03-26: Task 10 (E2E Smoke Test) — SKIPPED. Requires Docker daemon (not running on this machine) and live API keys. Cannot be completed in current environment.
+
+2026-03-26: Task 11 (README) — COMPLETE. Created README.md following the existing data-analyst PoC pattern. Covers: overview, how it works (3 tool groups + 5-step workflow), prerequisites, usage with CLI flags table, environment variables table, demo scenarios, and evolution path. Typecheck clean. All non-Docker tests pass (12 passed, 5 skipped, 2 expected Docker failures).
