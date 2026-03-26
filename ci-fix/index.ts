@@ -1,0 +1,137 @@
+// ci-fix/index.ts
+import { config } from 'dotenv';
+import { existsSync } from 'fs';
+import { execSync } from 'child_process';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+import { parseArgs } from 'util';
+import { createCiTools } from './tools/ci-tools.ts';
+import { createSandboxTools } from './tools/sandbox-tools.ts';
+import { createGitHubTools } from './tools/github-tools.ts';
+import { createSandbox, destroySandbox } from './sandbox.ts';
+import { runAgent } from './agent.ts';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+const c = {
+  reset: '\x1b[0m',
+  bold: '\x1b[1m',
+  dim: '\x1b[2m',
+  red: '\x1b[31m',
+  green: '\x1b[32m',
+  yellow: '\x1b[33m',
+  cyan: '\x1b[36m',
+};
+
+config();
+
+// --- Parse CLI args ---
+const { values } = parseArgs({
+  options: {
+    repo: { type: 'string' },
+    branch: { type: 'string' },
+    build: { type: 'string' },
+    scenario: { type: 'string' },
+    'dry-run': { type: 'boolean', default: false },
+  },
+});
+
+const repo = values.repo;
+const branch = values.branch;
+const scenario = values.scenario;
+const dryRun = values['dry-run'] ?? false;
+const model = process.env.MODEL || 'anthropic:claude-sonnet-4-20250514';
+
+// --- Validate args ---
+if (!repo || !branch) {
+  console.error(`${c.red}Usage: tsx index.ts --repo org/repo --branch branch-name [--scenario test-failure] [--dry-run]${c.reset}`);
+  process.exit(1);
+}
+
+if (!scenario && !values.build) {
+  console.error(`${c.red}Either --scenario or --build is required.${c.reset}`);
+  process.exit(1);
+}
+
+// --- Validate scenario fixtures exist ---
+if (scenario) {
+  const fixtureDir = join(__dirname, 'fixtures', scenario);
+  if (!existsSync(fixtureDir)) {
+    const available = ['test-failure', 'lint-error'];
+    console.error(`${c.red}Scenario "${scenario}" not found. Available: ${available.join(', ')}${c.reset}`);
+    process.exit(1);
+  }
+}
+
+// --- Preflight checks ---
+function checkDocker(): boolean {
+  try {
+    execSync('docker info', { stdio: 'ignore' });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+if (!checkDocker()) {
+  console.error(`${c.red}Docker is not running. Please start Docker and try again.${c.reset}`);
+  process.exit(1);
+}
+
+const aiGatewayKey = process.env.AI_GATEWAY_API_KEY;
+if (!aiGatewayKey) {
+  console.error(`${c.red}AI_GATEWAY_API_KEY environment variable is required.${c.reset}`);
+  process.exit(1);
+}
+
+const githubToken = process.env.GITHUB_TOKEN;
+if (!githubToken) {
+  console.error(`${c.red}GITHUB_TOKEN environment variable is required.${c.reset}`);
+  process.exit(1);
+}
+
+// --- Main ---
+async function main() {
+  console.log(`\n${c.bold}CI Fix Agent${c.reset} ${c.dim}-- autonomous CI failure diagnosis and repair${c.reset}\n`);
+  console.log(`${c.cyan}Repo:${c.reset}     ${repo}`);
+  console.log(`${c.cyan}Branch:${c.reset}   ${branch}`);
+  console.log(`${c.cyan}Scenario:${c.reset} ${scenario || 'live'}`);
+  console.log(`${c.cyan}Dry run:${c.reset}  ${dryRun}`);
+  console.log(`${c.cyan}Model:${c.reset}    ${model}\n`);
+
+  // 1. Start sandbox
+  console.log(`${c.dim}Starting Docker sandbox...${c.reset}`);
+  const containerId = await createSandbox({ githubToken: githubToken! });
+  console.log(`${c.dim}Sandbox ready: ${containerId.substring(0, 12)}${c.reset}\n`);
+
+  // Handle SIGINT cleanup
+  const cleanup = async () => {
+    console.log(`\n${c.dim}Tearing down sandbox...${c.reset}`);
+    await destroySandbox(containerId);
+    process.exit(0);
+  };
+  process.on('SIGINT', cleanup);
+
+  try {
+    // 2. Build tools
+    const tools = {
+      ...(scenario ? createCiTools({ scenario }) : {}),
+      ...createSandboxTools({ containerId }),
+      ...createGitHubTools({ token: githubToken!, dryRun }),
+    };
+
+    // 3. Run agent
+    await runAgent({ model, tools, repo: repo!, branch: branch! });
+
+    console.log(`${c.green}${c.bold}Agent complete.${c.reset}`);
+  } finally {
+    // 4. Tear down sandbox
+    console.log(`${c.dim}Tearing down sandbox...${c.reset}`);
+    await destroySandbox(containerId);
+  }
+}
+
+main().catch((err) => {
+  console.error(`${c.red}Fatal: ${err.message}${c.reset}`);
+  process.exit(1);
+});

@@ -9,3 +9,5 @@
 2026-03-26: Task 7 (System Prompt) — COMPLETE. Created system-prompt.ts with SYSTEM_PROMPT constant. Prompt defines 5-step workflow (Diagnose → Locate → Fix → Validate → Submit) and rules for minimal changes. Typecheck clean.
 
 2026-03-26: Task 8 (Agent Loop) — COMPLETE. Created agent.ts and agent.test.ts. Implements runAgent function using streamText with gateway model, system prompt, and tool forwarding. Adapted plan from AI SDK v3 (maxSteps) to current version (stopWhen: stepCountIs(25)). Structural test passes, typecheck clean.
+
+2026-03-26: Task 9 (CLI Entry Point) — COMPLETE. Created index.ts with CLI arg parsing (--repo, --branch, --scenario, --build, --dry-run), preflight checks (Docker, AI_GATEWAY_API_KEY, GITHUB_TOKEN), scenario fixture validation, sandbox lifecycle with SIGINT cleanup, tool assembly, and agent invocation. Used non-null assertions for repo/branch after validation guards. Typecheck clean. All non-Docker tests pass (12 passed, 5 skipped Docker tests).

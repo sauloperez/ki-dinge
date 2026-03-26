@@ -833,11 +833,11 @@ git commit -m "feat(ci-fix): add agent system prompt"
 - Create: `ci-fix/agent.ts`
 - Create: `ci-fix/agent.test.ts`
 
-- [ ] **Step 1: Create agent.ts**
+- [x] **Step 1: Create agent.ts**
 
 ```ts
 // ci-fix/agent.ts
-import { gateway, streamText } from 'ai';
+import { gateway, streamText, stepCountIs } from 'ai';
 import { SYSTEM_PROMPT } from './system-prompt.ts';
 
 interface AgentConfig {
@@ -855,7 +855,7 @@ export async function runAgent({ model, tools, repo, branch }: AgentConfig): Pro
     system: SYSTEM_PROMPT,
     messages: [{ role: 'user', content: initialMessage }],
     tools,
-    maxSteps: 25,
+    stopWhen: stepCountIs(25),
   });
 
   for await (const event of result.textStream) {
@@ -866,7 +866,7 @@ export async function runAgent({ model, tools, repo, branch }: AgentConfig): Pro
 }
 ```
 
-- [ ] **Step 2: Write a structural test for agent.ts**
+- [x] **Step 2: Write a structural test for agent.ts**
 
 ```ts
 // ci-fix/agent.test.ts
@@ -881,12 +881,12 @@ describe('agent', () => {
 });
 ```
 
-- [ ] **Step 3: Run test to verify it passes**
+- [x] **Step 3: Run test to verify it passes**
 
 Run: `cd ci-fix && pnpm test -- agent.test.ts`
 Expected: PASS
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add ci-fix/agent.ts ci-fix/agent.test.ts
@@ -900,7 +900,7 @@ git commit -m "feat(ci-fix): implement agent loop with streamText"
 **Files:**
 - Create: `ci-fix/index.ts`
 
-- [ ] **Step 1: Create index.ts**
+- [x] **Step 1: Create index.ts**
 
 ```ts
 // ci-fix/index.ts
@@ -1042,12 +1042,12 @@ main().catch((err) => {
 });
 ```
 
-- [ ] **Step 2: Verify typecheck passes**
+- [x] **Step 2: Verify typecheck passes**
 
 Run: `cd ci-fix && pnpm typecheck`
 Expected: No errors
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add ci-fix/index.ts
