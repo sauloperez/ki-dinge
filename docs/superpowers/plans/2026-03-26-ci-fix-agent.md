@@ -217,7 +217,7 @@ git commit -m "feat(ci-fix): add mock CI fixture data for test-failure and lint-
 - Create: `ci-fix/tools/ci-tools.ts`
 - Create: `ci-fix/tools/ci-tools.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // ci-fix/tools/ci-tools.test.ts
@@ -284,12 +284,12 @@ describe('createCiTools', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cd ci-fix && pnpm test -- tools/ci-tools.test.ts`
 Expected: FAIL — module not found
 
-- [ ] **Step 3: Implement createCiTools**
+- [x] **Step 3: Implement createCiTools**
 
 ```ts
 // ci-fix/tools/ci-tools.ts
@@ -352,12 +352,12 @@ export function createCiTools({ scenario }: { scenario: string }) {
 }
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `cd ci-fix && pnpm test -- tools/ci-tools.test.ts`
 Expected: All tests PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add ci-fix/tools/ci-tools.ts ci-fix/tools/ci-tools.test.ts
