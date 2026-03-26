@@ -51,6 +51,7 @@ ci-fix/
 **Files:**
 - Create: `ci-fix/package.json`
 - Create: `ci-fix/tsconfig.json`
+- Create: `ci-fix/.gitignore`
 
 - [ ] **Step 1: Create package.json**
 
@@ -97,19 +98,27 @@ ci-fix/
 }
 ```
 
-- [ ] **Step 3: Install dependencies**
+- [ ] **Step 3: Create .gitignore**
+
+```
+node_modules/
+.env
+dist/
+```
+
+- [ ] **Step 4: Install dependencies**
 
 Run: `cd ci-fix && pnpm install`
 
-- [ ] **Step 4: Verify typecheck runs**
+- [ ] **Step 5: Verify typecheck runs**
 
 Run: `cd ci-fix && pnpm typecheck`
 Expected: Passes (no TS files yet, should succeed cleanly)
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
-git add ci-fix/package.json ci-fix/tsconfig.json ci-fix/pnpm-lock.yaml
+git add ci-fix/package.json ci-fix/tsconfig.json ci-fix/.gitignore ci-fix/pnpm-lock.yaml
 git commit -m "feat(ci-fix): scaffold project with dependencies"
 ```
 
@@ -635,7 +644,11 @@ git commit -m "feat(ci-fix): implement Docker sandbox tools (read/write/search/l
 - Create: `ci-fix/tools/github-tools.ts`
 - Create: `ci-fix/tools/github-tools.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [ ] **Step 1: Inspect `@github-tools/sdk` API**
+
+Run: `cd ci-fix && node -e "const m = require('@github-tools/sdk'); console.log(Object.keys(m));"` or check `node_modules/@github-tools/sdk/dist/index.d.ts` to confirm the actual export names (`createGithubTools`, tool names). Adapt the code in Step 3 to match.
+
+- [ ] **Step 2: Write the failing test**
 
 ```ts
 // ci-fix/tools/github-tools.test.ts
@@ -657,12 +670,12 @@ describe('createGitHubTools', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [ ] **Step 3: Run test to verify it fails**
 
 Run: `cd ci-fix && pnpm test -- tools/github-tools.test.ts`
 Expected: FAIL — module not found
 
-- [ ] **Step 3: Implement createGitHubTools**
+- [ ] **Step 4: Implement createGitHubTools**
 
 Note: The exact implementation depends on the `@github-tools/sdk` API. Inspect the package after install and adapt. The structure below is the intended shape — adjust imports and API calls to match the actual SDK.
 
@@ -738,12 +751,12 @@ function createDryRunTools() {
 
 **Important:** After `pnpm install`, check the actual `@github-tools/sdk` exports. The `createGithubTools` function and tool names may differ. Read the package's types or README to confirm. Adapt the cherry-pick accordingly.
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [ ] **Step 5: Run tests to verify they pass**
 
 Run: `cd ci-fix && pnpm test -- tools/github-tools.test.ts`
 Expected: All tests PASS
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
 git add ci-fix/tools/github-tools.ts ci-fix/tools/github-tools.test.ts
@@ -949,6 +962,12 @@ if (!checkDocker()) {
   process.exit(1);
 }
 
+const aiGatewayKey = process.env.AI_GATEWAY_API_KEY;
+if (!aiGatewayKey) {
+  console.error(`${c.red}AI_GATEWAY_API_KEY environment variable is required.${c.reset}`);
+  process.exit(1);
+}
+
 const githubToken = process.env.GITHUB_TOKEN;
 if (!githubToken) {
   console.error(`${c.red}GITHUB_TOKEN environment variable is required.${c.reset}`);
@@ -1044,8 +1063,10 @@ Iterate on any problems found — adjust system prompt, tool implementations, or
 
 - [ ] **Step 5: Commit any fixes**
 
+Stage only the changed source files (not `.env`):
+
 ```bash
-git add -A ci-fix/
+git add ci-fix/index.ts ci-fix/agent.ts ci-fix/system-prompt.ts ci-fix/tools/ ci-fix/fixtures/ ci-fix/sandbox.ts
 git commit -m "fix(ci-fix): address issues from smoke testing"
 ```
 
