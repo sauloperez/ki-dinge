@@ -373,7 +373,7 @@ git commit -m "feat(ci-fix): implement mock CI tools with fixture loading"
 - Create: `ci-fix/sandbox.ts`
 - Create: `ci-fix/sandbox.test.ts`
 
-- [ ] **Step 1: Create Dockerfile**
+- [x] **Step 1: Create Dockerfile**
 
 ```dockerfile
 FROM node:20-slim
@@ -383,12 +383,12 @@ RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 WORKDIR /home/project
 ```
 
-- [ ] **Step 2: Build the Docker image**
+- [x] **Step 2: Build the Docker image**
 
 Run: `cd ci-fix && docker build -t ci-fix-sandbox .`
 Expected: Image builds successfully
 
-- [ ] **Step 3: Write the failing test**
+- [x] **Step 3: Write the failing test**
 
 ```ts
 // ci-fix/sandbox.test.ts
@@ -418,12 +418,12 @@ describe('sandbox', () => {
 });
 ```
 
-- [ ] **Step 4: Run test to verify it fails**
+- [x] **Step 4: Run test to verify it fails**
 
 Run: `cd ci-fix && pnpm test -- sandbox.test.ts`
 Expected: FAIL — module not found
 
-- [ ] **Step 5: Implement sandbox.ts**
+- [x] **Step 5: Implement sandbox.ts**
 
 ```ts
 // ci-fix/sandbox.ts
@@ -448,12 +448,12 @@ export async function destroySandbox(containerId: string): Promise<void> {
 }
 ```
 
-- [ ] **Step 6: Run tests to verify they pass**
+- [x] **Step 6: Run tests to verify they pass**
 
 Run: `cd ci-fix && pnpm test -- sandbox.test.ts`
 Expected: All tests PASS (requires Docker running)
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add ci-fix/Dockerfile ci-fix/sandbox.ts ci-fix/sandbox.test.ts
