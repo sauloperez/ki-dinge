@@ -8,9 +8,14 @@ function logged<TInput, TOutput>(
   execute: (input: TInput) => Promise<TOutput>,
 ): (input: TInput) => Promise<TOutput> {
   return async (input) => {
-    const output = await execute(input);
-    await logToolCall(name, input, output);
-    return output;
+    try {
+      const output = await execute(input);
+      await logToolCall(name, input, output);
+      return output;
+    } catch (err) {
+      await logToolCall(name, input, { error: (err as Error).message });
+      throw err;
+    }
   };
 }
 
