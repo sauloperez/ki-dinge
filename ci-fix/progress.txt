@@ -7,3 +7,5 @@
 2026-03-26: Task 6 (GitHub Tools) — COMPLETE. Created tools/github-tools.ts and tools/github-tools.test.ts. Implements createGitHubTools factory with two modes: live mode cherry-picks listPullRequests, createPullRequest, addPullRequestComment from @github-tools/sdk; dry-run mode provides matching tools that log to console instead of hitting the API. Aligned dry-run tool schemas with SDK schemas (listPullRequests needs state+perPage, createPullRequest needs draft, addPullRequestComment uses pullNumber not pullRequestNumber). All 5 tests pass, typecheck clean.
 
 2026-03-26: Task 7 (System Prompt) — COMPLETE. Created system-prompt.ts with SYSTEM_PROMPT constant. Prompt defines 5-step workflow (Diagnose → Locate → Fix → Validate → Submit) and rules for minimal changes. Typecheck clean.
+
+2026-03-26: Task 8 (Agent Loop) — COMPLETE. Created agent.ts and agent.test.ts. Implements runAgent function using streamText with gateway model, system prompt, and tool forwarding. Adapted plan from AI SDK v3 (maxSteps) to current version (stopWhen: stepCountIs(25)). Structural test passes, typecheck clean.
