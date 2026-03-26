@@ -26,7 +26,9 @@ const c = {
 config();
 
 // --- Parse CLI args ---
+const rawArgs = process.argv.slice(2);
 const { values } = parseArgs({
+  args: rawArgs[0] === '--' ? rawArgs.slice(1) : rawArgs,
   options: {
     repo: { type: 'string' },
     branch: { type: 'string' },
