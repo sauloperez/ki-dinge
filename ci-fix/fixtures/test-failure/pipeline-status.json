@@ -1,0 +1,9 @@
+{
+  "repo": "acme/web-app",
+  "branch": "feature/user-auth",
+  "jobs": [
+    { "id": "job-101", "name": "install", "status": "passed" },
+    { "id": "job-102", "name": "lint", "status": "passed" },
+    { "id": "job-103", "name": "test", "status": "failed" }
+  ]
+}

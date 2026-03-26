@@ -134,7 +134,7 @@ git commit -m "feat(ci-fix): scaffold project with dependencies"
 - Create: `ci-fix/fixtures/lint-error/job-logs.json`
 - Create: `ci-fix/fixtures/lint-error/test-results.json`
 
-- [ ] **Step 1: Create test-failure/pipeline-status.json**
+- [x] **Step 1: Create test-failure/pipeline-status.json**
 
 ```json
 {
@@ -148,7 +148,7 @@ git commit -m "feat(ci-fix): scaffold project with dependencies"
 }
 ```
 
-- [ ] **Step 2: Create test-failure/job-logs.json**
+- [x] **Step 2: Create test-failure/job-logs.json**
 
 ```json
 {
@@ -156,7 +156,7 @@ git commit -m "feat(ci-fix): scaffold project with dependencies"
 }
 ```
 
-- [ ] **Step 3: Create test-failure/test-results.json**
+- [x] **Step 3: Create test-failure/test-results.json**
 
 ```json
 {
@@ -171,7 +171,7 @@ git commit -m "feat(ci-fix): scaffold project with dependencies"
 }
 ```
 
-- [ ] **Step 4: Create lint-error/pipeline-status.json**
+- [x] **Step 4: Create lint-error/pipeline-status.json**
 
 ```json
 {
@@ -185,7 +185,7 @@ git commit -m "feat(ci-fix): scaffold project with dependencies"
 }
 ```
 
-- [ ] **Step 5: Create lint-error/job-logs.json**
+- [x] **Step 5: Create lint-error/job-logs.json**
 
 ```json
 {
@@ -193,7 +193,7 @@ git commit -m "feat(ci-fix): scaffold project with dependencies"
 }
 ```
 
-- [ ] **Step 6: Create lint-error/test-results.json**
+- [x] **Step 6: Create lint-error/test-results.json**
 
 ```json
 {
@@ -202,7 +202,7 @@ git commit -m "feat(ci-fix): scaffold project with dependencies"
 }
 ```
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add ci-fix/fixtures/

@@ -1,0 +1,9 @@
+{
+  "repo": "acme/web-app",
+  "branch": "feature/search",
+  "jobs": [
+    { "id": "job-201", "name": "install", "status": "passed" },
+    { "id": "job-202", "name": "lint", "status": "failed" },
+    { "id": "job-203", "name": "test", "status": "skipped" }
+  ]
+}

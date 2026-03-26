@@ -1,0 +1,3 @@
+{
+  "job-202": "$ npm run lint\n\n> web-app@1.0.0 lint\n> eslint src/\n\n/home/project/src/components/SearchBar.tsx\n  3:10  error  'useState' is defined but never used  @typescript-eslint/no-unused-vars\n  4:10  error  'useCallback' is defined but never used  @typescript-eslint/no-unused-vars\n\n✖ 2 problems (2 errors, 0 warnings)\n\nProcess exited with code 1"
+}

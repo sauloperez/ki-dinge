@@ -1,0 +1,10 @@
+{
+  "job-103": [
+    {
+      "file": "src/utils/calc.test.ts",
+      "testName": "calculateDiscount: applies 10% discount for orders over $100",
+      "error": "AssertionError: expected 95 to be 90",
+      "stackTrace": "at src/utils/calc.test.ts:8:28"
+    }
+  ]
+}
