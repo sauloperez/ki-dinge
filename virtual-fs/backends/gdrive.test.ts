@@ -81,7 +81,8 @@ describe('GDriveBackend — root path resolution', () => {
     }));
   });
 
-  it('throws if a path segment is not found', async () => {
+  it('throws if a path segment is not found after both parent-based and fallback searches', async () => {
+    // Both the parent-based query and the sharedWithMe fallback return nothing
     mockDrive.files.list.mockResolvedValue({ data: { files: [] } });
 
     const backend = new GDriveBackend({
@@ -90,10 +91,44 @@ describe('GDriveBackend — root path resolution', () => {
     });
 
     await expect(backend.list()).rejects.toThrow("Folder not found: 'nonexistent'");
+    // Two calls: parent-based query + fallback name-only query
+    expect(mockDrive.files.list).toHaveBeenCalledTimes(2);
+  });
+
+  it('falls back to name-only search when folder is shared with the service account (not under root)', async () => {
+    mockDrive.files.list
+      .mockResolvedValueOnce({ data: { files: [] } }) // parent-based: not found under root
+      .mockResolvedValueOnce({ data: { files: [{ id: 'folder-alpinisme', name: 'alpinisme', mimeType: 'application/vnd.google-apps.folder' }] } }) // fallback: found
+      .mockResolvedValue({ data: { files: [], nextPageToken: undefined } }); // buildCache: empty contents
+
+    const backend = new GDriveBackend({
+      keyFile: '/fake/key.json',
+      rootFolderPath: 'My Drive/alpinisme',
+    });
+
+    await backend.list();
+
+    const calls = mockDrive.files.list.mock.calls;
+    // First call uses parent constraint
+    expect(calls[0][0].q).toContain("'root' in parents");
+    // Second call is the fallback — no parent constraint
+    expect(calls[1][0].q).not.toContain("in parents");
+    expect(calls[1][0].q).toContain("name = 'alpinisme'");
   });
 });
 
 describe('GDriveBackend — cache building', () => {
+  it('uses sharedWithMe query when building cache from root (service account support)', async () => {
+    mockDrive.files.list.mockResolvedValue({ data: { files: [], nextPageToken: undefined } });
+
+    const backend = new GDriveBackend({ keyFile: '/fake/key.json', rootFolderPath: 'My Drive' });
+    await backend.list();
+
+    const rootQuery = mockDrive.files.list.mock.calls[0][0].q as string;
+    expect(rootQuery).toContain('sharedWithMe = true');
+    expect(rootQuery).toContain("'root' in parents");
+  });
+
   it('populates cache with files at the root level', async () => {
     mockDrive.files.list.mockResolvedValue({
       data: {
