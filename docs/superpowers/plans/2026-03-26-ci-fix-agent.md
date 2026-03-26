@@ -53,7 +53,7 @@ ci-fix/
 - Create: `ci-fix/tsconfig.json`
 - Create: `ci-fix/.gitignore`
 
-- [ ] **Step 1: Create package.json**
+- [x] **Step 1: Create package.json**
 
 ```json
 {
@@ -80,7 +80,7 @@ ci-fix/
 }
 ```
 
-- [ ] **Step 2: Create tsconfig.json**
+- [x] **Step 2: Create tsconfig.json**
 
 ```json
 {
@@ -98,7 +98,7 @@ ci-fix/
 }
 ```
 
-- [ ] **Step 3: Create .gitignore**
+- [x] **Step 3: Create .gitignore**
 
 ```
 node_modules/
@@ -106,16 +106,16 @@ node_modules/
 dist/
 ```
 
-- [ ] **Step 4: Install dependencies**
+- [x] **Step 4: Install dependencies**
 
 Run: `cd ci-fix && pnpm install`
 
-- [ ] **Step 5: Verify typecheck runs**
+- [x] **Step 5: Verify typecheck runs**
 
 Run: `cd ci-fix && pnpm typecheck`
 Expected: Passes (no TS files yet, should succeed cleanly)
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add ci-fix/package.json ci-fix/tsconfig.json ci-fix/.gitignore ci-fix/pnpm-lock.yaml
