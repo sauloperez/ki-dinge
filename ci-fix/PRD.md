@@ -1,0 +1,1 @@
+docs/superpowers/plans/2026-03-26-ci-fix-agent.md
