@@ -19,10 +19,10 @@ const c = {
 
 config();
 
-const backend = process.env.GDRIVE_KEY_FILE && process.env.GDRIVE_ROOT_FOLDER_PATH
+const backend = process.env.GDRIVE_KEY_FILE
   ? new GDriveBackend({
       keyFile: process.env.GDRIVE_KEY_FILE,
-      rootFolderPath: process.env.GDRIVE_ROOT_FOLDER_PATH,
+      rootFolderPath: process.env.GDRIVE_ROOT_FOLDER_PATH ?? 'My Drive',
     })
   : new LocalBackend(new URL('./data', import.meta.url).pathname);
 

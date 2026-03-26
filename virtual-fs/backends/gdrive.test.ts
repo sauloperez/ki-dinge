@@ -46,6 +46,17 @@ describe('GDriveBackend — auth', () => {
       scopes: ['https://www.googleapis.com/auth/drive.readonly'],
     });
   });
+
+  it('defaults rootFolderPath to My Drive when omitted', async () => {
+    mockDrive.files.list.mockResolvedValue({ data: { files: [], nextPageToken: undefined } });
+
+    const backend = new GDriveBackend({ keyFile: '/fake/key.json' });
+    await backend.list();
+
+    // Should not throw and should issue a root-level sharedWithMe query
+    const rootQuery = mockDrive.files.list.mock.calls[0][0].q as string;
+    expect(rootQuery).toContain('sharedWithMe = true');
+  });
 });
 
 describe('GDriveBackend — root path resolution', () => {

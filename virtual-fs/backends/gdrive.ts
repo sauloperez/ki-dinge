@@ -4,20 +4,21 @@ import { StorageBackend } from '../backend.ts';
 
 export interface GDriveOptions {
   keyFile: string;
-  rootFolderPath: string;
+  /** Defaults to 'My Drive' (service account root + shared items) */
+  rootFolderPath?: string;
 }
 
 const dbg = (msg: string) => process.stderr.write(`\x1b[2m[gdrive] ${msg}\x1b[0m\n`);
 
 export class GDriveBackend implements StorageBackend {
-  private options: GDriveOptions;
+  private options: Required<GDriveOptions>;
   private drive: drive_v3.Drive | null = null;
   private cache: Map<string, string> = new Map(); // readable path → file ID
   private folders: Set<string> = new Set(); // paths that are folders
   private initialized = false;
 
   constructor(options: GDriveOptions) {
-    this.options = options;
+    this.options = { rootFolderPath: 'My Drive', ...options };
   }
 
   private async init(): Promise<void> {
