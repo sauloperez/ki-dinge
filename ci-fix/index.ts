@@ -106,13 +106,18 @@ async function main() {
   const containerId = await createSandbox({ githubToken: githubToken! });
   console.log(`${c.dim}Sandbox ready: ${containerId.substring(0, 12)}${c.reset}\n`);
 
-  // Handle SIGINT cleanup
-  const cleanup = async () => {
+  let tornDown = false;
+  const teardown = async () => {
+    if (tornDown) return;
+    tornDown = true;
     console.log(`\n${c.dim}Tearing down sandbox...${c.reset}`);
     await destroySandbox(containerId);
-    process.exit(0);
   };
-  process.on('SIGINT', cleanup);
+
+  process.on('SIGINT', async () => {
+    await teardown();
+    process.exit(0);
+  });
 
   try {
     // 2. Build tools
@@ -128,8 +133,7 @@ async function main() {
     console.log(`${c.green}${c.bold}Agent complete.${c.reset}`);
   } finally {
     // 4. Tear down sandbox
-    console.log(`${c.dim}Tearing down sandbox...${c.reset}`);
-    await destroySandbox(containerId);
+    await teardown();
   }
 }
 
