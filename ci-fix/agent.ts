@@ -19,10 +19,26 @@ export async function runAgent({ model, tools, repo, branch }: AgentConfig): Pro
     messages: [{ role: 'user', content: initialMessage }],
     tools,
     stopWhen: stepCountIs(25),
+    onStepFinish: ({ stepNumber, toolCalls, toolResults, finishReason, usage }) => {
+      console.error(`\n[step:${stepNumber}] finishReason=${finishReason} tokens=${usage.totalTokens} toolCalls=${toolCalls.length} toolResults=${toolResults.length}`);
+    },
   });
 
-  for await (const event of result.textStream) {
-    process.stdout.write(event);
+  for await (const part of result.fullStream) {
+    switch (part.type) {
+      case 'text-delta':
+        process.stdout.write(part.text);
+        break;
+      case 'tool-call':
+        console.error(`\n[tool-call] ${part.toolName}(${JSON.stringify(part.input)})`);
+        break;
+      case 'tool-result':
+        console.error(`[tool-result] ${part.toolName} → ${JSON.stringify(part.output).slice(0, 200)}`);
+        break;
+      case 'error':
+        console.error(`[error] ${part.error}`);
+        break;
+    }
   }
 
   console.log('\n');
