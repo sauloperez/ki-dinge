@@ -1,10 +1,10 @@
 // ci-fix/agent.ts
-import { gateway, streamText, stepCountIs } from 'ai';
+import { gateway, streamText, stepCountIs, type ToolSet } from 'ai';
 import { SYSTEM_PROMPT } from './system-prompt.ts';
 
 interface AgentConfig {
   model: string;
-  tools: Record<string, any>;
+  tools: ToolSet;
   repo: string;
   branch: string;
 }
