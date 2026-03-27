@@ -1,5 +1,6 @@
 // ci-fix/agent.ts
-import { gateway, streamText, stepCountIs, type ToolSet } from 'ai';
+import { streamText, stepCountIs, type ToolSet } from 'ai';
+import { openrouter } from '@openrouter/ai-sdk-provider';
 import { SYSTEM_PROMPT } from './system-prompt.ts';
 
 interface AgentConfig {
@@ -13,7 +14,7 @@ export async function runAgent({ model, tools, repo, branch }: AgentConfig): Pro
   const initialMessage = `A CI build has failed for the repository "${repo}" on branch "${branch}". Please diagnose the failure and fix it.`;
 
   const result = streamText({
-    model: gateway(model),
+    model: openrouter('openrouter/free'),
     system: SYSTEM_PROMPT,
     messages: [{ role: 'user', content: initialMessage }],
     tools,
