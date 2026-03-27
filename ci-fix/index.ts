@@ -34,19 +34,17 @@ const { values } = parseArgs({
     branch: { type: 'string' },
     build: { type: 'string' },
     scenario: { type: 'string' },
-    'dry-run': { type: 'boolean', default: false },
   },
 });
 
 const repo = values.repo;
 const branch = values.branch;
 const scenario = values.scenario;
-const dryRun = values['dry-run'] ?? false;
 const model = process.env.MODEL || 'openrouter/free';
 
 // --- Validate args ---
 if (!repo || !branch) {
-  console.error(`${c.red}Usage: tsx index.ts --repo org/repo --branch branch-name [--scenario test-failure] [--dry-run]${c.reset}`);
+  console.error(`${c.red}Usage: tsx index.ts --repo org/repo --branch branch-name [--scenario test-failure]${c.reset}`);
   process.exit(1);
 }
 
@@ -103,7 +101,6 @@ async function main() {
   console.log(`${c.cyan}Repo:${c.reset}     ${repo}`);
   console.log(`${c.cyan}Branch:${c.reset}   ${branch}`);
   console.log(`${c.cyan}Scenario:${c.reset} ${scenario || 'live'}`);
-  console.log(`${c.cyan}Dry run:${c.reset}  ${dryRun}`);
   console.log(`${c.cyan}Model:${c.reset}    ${model}`);
   console.log(`${c.cyan}Log:${c.reset}      ${logFile}\n`);
 
@@ -138,7 +135,7 @@ async function main() {
     const tools = {
       ...(scenario ? createCiTools({ scenario }) : {}),
       ...createSandboxTools({ containerId }),
-      ...createGitHubTools({ token: githubToken!, dryRun }),
+      ...createGitHubTools({ token: githubToken! }),
     };
 
     // 3. Run agent

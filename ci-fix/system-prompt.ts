@@ -26,13 +26,14 @@ Follow these steps in order:
 - You have at most 3 validation attempts. If you cannot fix it after 3 tries, stop and report what you tried.
 
 ### 5. Submit
-- Create a new branch from the current branch: git checkout -b ci-fix/<short-description>
+- Create a new branch from the current branch with a timestamped name: git checkout -b ci-fix/<short-description>-$(date +%s)
+  - Example: ci-fix/test-failure-1234567890 or ci-fix/lint-error-1234567890
 - Commit your changes with a clear message explaining the fix.
-- Push the branch.
+- Push the branch to origin: git push -u origin <branch-name>
 - Call createPullRequest to open a PR against the original branch.
   - PR title: "fix: <concise description of what was fixed>"
   - PR body: Include root cause analysis and what was changed.
-- If an existing PR exists for this branch (check with listPullRequests), call addPullRequestComment with a summary of what failed and how it was fixed.
+- NOTE: This will create a REAL pull request on GitHub. Each run creates a new PR with a unique branch name.
 
 ## Rules
 - Always explain the root cause — don't just fix the symptom.
