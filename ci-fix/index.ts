@@ -5,6 +5,7 @@ import { execSync } from 'child_process';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { parseArgs } from 'util';
+import chalk from 'chalk';
 import { createCiTools } from './tools/ci-tools.ts';
 import { createSandboxTools } from './tools/sandbox-tools.ts';
 import { createGitHubTools } from './tools/github-tools.ts';
@@ -12,16 +13,6 @@ import { createSandbox, destroySandbox, populateSandbox } from './sandbox.ts';
 import { runAgent } from './agent.ts';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-
-const c = {
-  reset: '\x1b[0m',
-  bold: '\x1b[1m',
-  dim: '\x1b[2m',
-  red: '\x1b[31m',
-  green: '\x1b[32m',
-  yellow: '\x1b[33m',
-  cyan: '\x1b[36m',
-};
 
 config();
 
@@ -44,12 +35,12 @@ const model = process.env.MODEL || 'openrouter/free';
 
 // --- Validate args ---
 if (!repo || !branch) {
-  console.error(`${c.red}Usage: tsx index.ts --repo org/repo --branch branch-name [--scenario test-failure]${c.reset}`);
+  console.error(chalk.red('Usage: tsx index.ts --repo org/repo --branch branch-name [--scenario test-failure]'));
   process.exit(1);
 }
 
 if (!scenario && !values.build) {
-  console.error(`${c.red}Either --scenario or --build is required.${c.reset}`);
+  console.error(chalk.red('Either --scenario or --build is required.'));
   process.exit(1);
 }
 
@@ -58,7 +49,7 @@ if (scenario) {
   const fixtureDir = join(__dirname, 'fixtures', scenario);
   if (!existsSync(fixtureDir)) {
     const available = ['test-failure', 'lint-error'];
-    console.error(`${c.red}Scenario "${scenario}" not found. Available: ${available.join(', ')}${c.reset}`);
+    console.error(chalk.red(`Scenario "${scenario}" not found. Available: ${available.join(', ')}`));
     process.exit(1);
   }
 }
@@ -74,19 +65,19 @@ function checkDocker(): boolean {
 }
 
 if (!checkDocker()) {
-  console.error(`${c.red}Docker is not running. Please start Docker and try again.${c.reset}`);
+  console.error(chalk.red('Docker is not running. Please start Docker and try again.'));
   process.exit(1);
 }
 
 const aiGatewayKey = process.env.AI_GATEWAY_API_KEY;
 if (!aiGatewayKey) {
-  console.error(`${c.red}AI_GATEWAY_API_KEY environment variable is required.${c.reset}`);
+  console.error(chalk.red('AI_GATEWAY_API_KEY environment variable is required.'));
   process.exit(1);
 }
 
 const githubToken = process.env.GITHUB_TOKEN;
 if (!githubToken) {
-  console.error(`${c.red}GITHUB_TOKEN environment variable is required.${c.reset}`);
+  console.error(chalk.red('GITHUB_TOKEN environment variable is required.'));
   process.exit(1);
 }
 
@@ -97,22 +88,22 @@ async function main() {
   const logStream = createWriteStream(logFile, { flags: 'a' });
   const log = (msg: string) => logStream.write(msg + '\n');
 
-  console.log(`\n${c.bold}CI Fix Agent${c.reset} ${c.dim}-- autonomous CI failure diagnosis and repair${c.reset}\n`);
-  console.log(`${c.cyan}Repo:${c.reset}     ${repo}`);
-  console.log(`${c.cyan}Branch:${c.reset}   ${branch}`);
-  console.log(`${c.cyan}Scenario:${c.reset} ${scenario || 'live'}`);
-  console.log(`${c.cyan}Model:${c.reset}    ${model}`);
-  console.log(`${c.cyan}Log:${c.reset}      ${logFile}\n`);
+  console.log(`\n${chalk.bold('CI Fix Agent')} ${chalk.dim('-- autonomous CI failure diagnosis and repair')}\n`);
+  console.log(`${chalk.cyan('Repo:')}     ${repo}`);
+  console.log(`${chalk.cyan('Branch:')}   ${branch}`);
+  console.log(`${chalk.cyan('Scenario:')} ${scenario || 'live'}`);
+  console.log(`${chalk.cyan('Model:')}    ${model}`);
+  console.log(`${chalk.cyan('Log:')}      ${logFile}\n`);
 
   // 1. Start sandbox
-  console.log(`${c.dim}Starting Docker sandbox...${c.reset}`);
+  console.log(chalk.dim('Starting Docker sandbox...'));
   const containerId = await createSandbox({ githubToken: githubToken! });
-  console.log(`${c.dim}Sandbox ready: ${containerId.substring(0, 12)}${c.reset}`);
+  console.log(chalk.dim(`Sandbox ready: ${containerId.substring(0, 12)}`));
 
   if (scenario) {
     const projectDir = join(__dirname, 'fixtures', scenario, 'project');
     await populateSandbox(containerId, projectDir);
-    console.log(`${c.dim}Project files copied from fixtures/${scenario}/project${c.reset}\n`);
+    console.log(chalk.dim(`Project files copied from fixtures/${scenario}/project`) + '\n');
   } else {
     console.log();
   }
@@ -121,7 +112,7 @@ async function main() {
   const teardown = async () => {
     if (tornDown) return;
     tornDown = true;
-    console.log(`\n${c.dim}Tearing down sandbox...${c.reset}`);
+    console.log('\n' + chalk.dim('Tearing down sandbox...'));
     await destroySandbox(containerId);
   };
 
@@ -141,7 +132,7 @@ async function main() {
     // 3. Run agent
     await runAgent({ model, tools, repo: repo!, branch: branch!, log });
 
-    console.log(`${c.green}${c.bold}Agent complete.${c.reset}`);
+    console.log(chalk.green(chalk.bold('Agent complete.')));
   } finally {
     // 4. Tear down sandbox
     await teardown();
@@ -150,6 +141,6 @@ async function main() {
 }
 
 main().catch((err) => {
-  console.error(`${c.red}Fatal: ${err.message}${c.reset}`);
+  console.error(chalk.red(`Fatal: ${err.message}`));
   process.exit(1);
 });
