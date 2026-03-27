@@ -14,7 +14,7 @@ export async function runAgent({ model, tools, repo, branch }: AgentConfig): Pro
   const initialMessage = `A CI build has failed for the repository "${repo}" on branch "${branch}". Please diagnose the failure and fix it.`;
 
   const result = streamText({
-    model: openrouter('openrouter/free'),
+    model: openrouter(model),
     system: SYSTEM_PROMPT,
     messages: [{ role: 'user', content: initialMessage }],
     tools,

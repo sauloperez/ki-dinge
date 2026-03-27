@@ -42,7 +42,7 @@ const repo = values.repo;
 const branch = values.branch;
 const scenario = values.scenario;
 const dryRun = values['dry-run'] ?? false;
-const model = process.env.MODEL || 'anthropic:claude-sonnet-4-20250514';
+const model = process.env.MODEL || 'openrouter/free';
 
 // --- Validate args ---
 if (!repo || !branch) {
