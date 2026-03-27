@@ -8,9 +8,10 @@ interface AgentConfig {
   tools: ToolSet;
   repo: string;
   branch: string;
+  debug?: boolean;
 }
 
-export async function runAgent({ model, tools, repo, branch }: AgentConfig): Promise<void> {
+export async function runAgent({ model, tools, repo, branch, debug = false }: AgentConfig): Promise<void> {
   const initialMessage = `A CI build has failed for the repository "${repo}" on branch "${branch}". Please diagnose the failure and fix it.`;
 
   const result = streamText({
@@ -20,7 +21,9 @@ export async function runAgent({ model, tools, repo, branch }: AgentConfig): Pro
     tools,
     stopWhen: stepCountIs(25),
     onStepFinish: ({ stepNumber, toolCalls, toolResults, finishReason, usage }) => {
-      console.error(`\n[step:${stepNumber}] finishReason=${finishReason} tokens=${usage.totalTokens} toolCalls=${toolCalls.length} toolResults=${toolResults.length}`);
+      if (debug) {
+        console.error(`\n[step:${stepNumber}] finishReason=${finishReason} tokens=${usage.totalTokens} toolCalls=${toolCalls.length} toolResults=${toolResults.length}`);
+      }
     },
   });
 
@@ -30,13 +33,13 @@ export async function runAgent({ model, tools, repo, branch }: AgentConfig): Pro
         process.stdout.write(part.text);
         break;
       case 'tool-call':
-        console.error(`\n[tool-call] ${part.toolName}(${JSON.stringify(part.input)})`);
+        if (debug) console.error(`\n[tool-call] ${part.toolName}(${JSON.stringify(part.input)})`);
         break;
       case 'tool-result':
-        console.error(`[tool-result] ${part.toolName} → ${JSON.stringify(part.output).slice(0, 200)}`);
+        if (debug) console.error(`[tool-result] ${part.toolName} → ${JSON.stringify(part.output).slice(0, 200)}`);
         break;
       case 'error':
-        console.error(`[error] ${part.error}`);
+        if (debug) console.error(`[error] ${part.error}`);
         break;
     }
   }

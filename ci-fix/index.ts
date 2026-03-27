@@ -35,6 +35,7 @@ const { values } = parseArgs({
     build: { type: 'string' },
     scenario: { type: 'string' },
     'dry-run': { type: 'boolean', default: false },
+    debug: { type: 'boolean', default: false },
   },
 });
 
@@ -42,6 +43,7 @@ const repo = values.repo;
 const branch = values.branch;
 const scenario = values.scenario;
 const dryRun = values['dry-run'] ?? false;
+const debug = values.debug ?? false;
 const model = process.env.MODEL || 'openrouter/free';
 
 // --- Validate args ---
@@ -136,7 +138,7 @@ async function main() {
     };
 
     // 3. Run agent
-    await runAgent({ model, tools, repo: repo!, branch: branch! });
+    await runAgent({ model, tools, repo: repo!, branch: branch!, debug });
 
     console.log(`${c.green}${c.bold}Agent complete.${c.reset}`);
   } finally {
