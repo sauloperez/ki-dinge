@@ -1,6 +1,6 @@
 // ci-fix/index.ts
 import { config } from 'dotenv';
-import { existsSync, createWriteStream } from 'fs';
+import { existsSync, createWriteStream, mkdirSync } from 'fs';
 import { execSync } from 'child_process';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -94,7 +94,8 @@ if (!githubToken) {
 
 // --- Main ---
 async function main() {
-  const logFile = join(__dirname, `ci-fix-${Date.now()}.log`);
+  const logFile = join(__dirname, 'logs', `ci-fix-${Date.now()}.log`);
+  mkdirSync(join(__dirname, 'logs'), { recursive: true });
   const logStream = createWriteStream(logFile, { flags: 'a' });
   const log = (msg: string) => logStream.write(msg + '\n');
 
