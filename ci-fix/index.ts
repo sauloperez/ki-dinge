@@ -8,7 +8,7 @@ import { parseArgs } from 'util';
 import { createCiTools } from './tools/ci-tools.ts';
 import { createSandboxTools } from './tools/sandbox-tools.ts';
 import { createGitHubTools } from './tools/github-tools.ts';
-import { createSandbox, destroySandbox } from './sandbox.ts';
+import { createSandbox, destroySandbox, populateSandbox } from './sandbox.ts';
 import { runAgent } from './agent.ts';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -104,7 +104,15 @@ async function main() {
   // 1. Start sandbox
   console.log(`${c.dim}Starting Docker sandbox...${c.reset}`);
   const containerId = await createSandbox({ githubToken: githubToken! });
-  console.log(`${c.dim}Sandbox ready: ${containerId.substring(0, 12)}${c.reset}\n`);
+  console.log(`${c.dim}Sandbox ready: ${containerId.substring(0, 12)}${c.reset}`);
+
+  if (scenario) {
+    const projectDir = join(__dirname, 'fixtures', scenario, 'project');
+    await populateSandbox(containerId, projectDir);
+    console.log(`${c.dim}Project files copied from fixtures/${scenario}/project${c.reset}\n`);
+  } else {
+    console.log();
+  }
 
   let tornDown = false;
   const teardown = async () => {

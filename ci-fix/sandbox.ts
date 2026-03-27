@@ -17,3 +17,8 @@ export async function createSandbox({ githubToken }: { githubToken: string }): P
 export async function destroySandbox(containerId: string): Promise<void> {
   await exec('docker', ['rm', '-f', containerId]);
 }
+
+export async function populateSandbox(containerId: string, projectDir: string): Promise<void> {
+  // In production this would be a git clone of the actual repo into /home/project
+  await exec('docker', ['cp', `${projectDir}/.`, `${containerId}:/home/project`]);
+}
