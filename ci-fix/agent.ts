@@ -8,13 +8,10 @@ interface AgentConfig {
   tools: ToolSet;
   repo: string;
   branch: string;
-  debug?: boolean;
+  log: (msg: string) => void;
 }
 
-export async function runAgent({ model, tools, repo, branch, debug = false }: AgentConfig): Promise<void> {
-  const log = (...args: Parameters<typeof console.error>) => {
-    if (debug) console.error(...args);
-  };
+export async function runAgent({ model, tools, repo, branch, log }: AgentConfig): Promise<void> {
 
   const initialMessage = `A CI build has failed for the repository "${repo}" on branch "${branch}". Please diagnose the failure and fix it.`;
 

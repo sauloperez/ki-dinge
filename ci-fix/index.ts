@@ -1,6 +1,6 @@
 // ci-fix/index.ts
 import { config } from 'dotenv';
-import { existsSync } from 'fs';
+import { existsSync, createWriteStream } from 'fs';
 import { execSync } from 'child_process';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -35,7 +35,6 @@ const { values } = parseArgs({
     build: { type: 'string' },
     scenario: { type: 'string' },
     'dry-run': { type: 'boolean', default: false },
-    debug: { type: 'boolean', default: false },
   },
 });
 
@@ -43,7 +42,6 @@ const repo = values.repo;
 const branch = values.branch;
 const scenario = values.scenario;
 const dryRun = values['dry-run'] ?? false;
-const debug = values.debug ?? false;
 const model = process.env.MODEL || 'openrouter/free';
 
 // --- Validate args ---
@@ -96,12 +94,17 @@ if (!githubToken) {
 
 // --- Main ---
 async function main() {
+  const logFile = join(__dirname, `ci-fix-${Date.now()}.log`);
+  const logStream = createWriteStream(logFile, { flags: 'a' });
+  const log = (msg: string) => logStream.write(msg + '\n');
+
   console.log(`\n${c.bold}CI Fix Agent${c.reset} ${c.dim}-- autonomous CI failure diagnosis and repair${c.reset}\n`);
   console.log(`${c.cyan}Repo:${c.reset}     ${repo}`);
   console.log(`${c.cyan}Branch:${c.reset}   ${branch}`);
   console.log(`${c.cyan}Scenario:${c.reset} ${scenario || 'live'}`);
   console.log(`${c.cyan}Dry run:${c.reset}  ${dryRun}`);
-  console.log(`${c.cyan}Model:${c.reset}    ${model}\n`);
+  console.log(`${c.cyan}Model:${c.reset}    ${model}`);
+  console.log(`${c.cyan}Log:${c.reset}      ${logFile}\n`);
 
   // 1. Start sandbox
   console.log(`${c.dim}Starting Docker sandbox...${c.reset}`);
@@ -138,12 +141,13 @@ async function main() {
     };
 
     // 3. Run agent
-    await runAgent({ model, tools, repo: repo!, branch: branch!, debug });
+    await runAgent({ model, tools, repo: repo!, branch: branch!, log });
 
     console.log(`${c.green}${c.bold}Agent complete.${c.reset}`);
   } finally {
     // 4. Tear down sandbox
     await teardown();
+    logStream.end();
   }
 }
 
