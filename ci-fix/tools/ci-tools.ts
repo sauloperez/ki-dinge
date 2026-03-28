@@ -29,9 +29,9 @@ export function createCiTools({ scenario }: { scenario: string }) {
         repo: z.string().describe('GitHub org/repo identifier'),
         branch: z.string().describe('Branch name'),
       }),
-      execute: async () => ({
-        repo: pipelineData.repo,
-        branch: pipelineData.branch,
+      execute: async ({ repo, branch }: { repo: string; branch: string }) => ({
+        repo,
+        branch,
         jobs: pipelineData.jobs,
       }),
     }),

@@ -18,9 +18,12 @@ export async function destroySandbox(containerId: string): Promise<void> {
   await exec('docker', ['rm', '-f', containerId]);
 }
 
-export async function populateSandbox(containerId: string, projectDir: string): Promise<void> {
-  // In production this would be a git clone of the actual repo into /home/project
-  await exec('docker', ['cp', `${projectDir}/.`, `${containerId}:/home/project`]);
+export async function setupProject(containerId: string, repo: string, branch: string): Promise<void> {
+  const cloneUrl = `https://github.com/${repo}.git`;
+  await exec('docker', [
+    'exec', containerId, 'sh', '-c',
+    `git clone --depth=1 --branch "${branch}" "${cloneUrl}" /home/project && cd /home/project && npm install`,
+  ]);
 }
 
 export async function initGitCredentials(containerId: string): Promise<void> {

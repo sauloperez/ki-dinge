@@ -9,7 +9,7 @@ import chalk from 'chalk';
 import { createCiTools } from './tools/ci-tools.ts';
 import { createSandboxTools } from './tools/sandbox-tools.ts';
 import { createGitHubTools } from './tools/github-tools.ts';
-import { createSandbox, destroySandbox, populateSandbox, initGitCredentials } from './sandbox.ts';
+import { createSandbox, destroySandbox, setupProject, initGitCredentials } from './sandbox.ts';
 import { runAgent } from './agent.ts';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -103,13 +103,9 @@ async function main() {
   // Initialize git credentials for push authentication
   await initGitCredentials(containerId);
 
-  if (scenario) {
-    const projectDir = join(__dirname, 'fixtures', scenario, 'project');
-    await populateSandbox(containerId, projectDir);
-    console.log(chalk.dim(`Project files copied from fixtures/${scenario}/project`) + '\n');
-  } else {
-    console.log();
-  }
+  console.log(chalk.dim(`Setting up ${repo}@${branch}...`));
+  await setupProject(containerId, repo!, branch!);
+  console.log(chalk.dim('Project ready.') + '\n');
 
   let tornDown = false;
   const teardown = async () => {
