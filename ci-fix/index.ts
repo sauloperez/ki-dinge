@@ -14,7 +14,7 @@ import { runAgent } from './agent.ts';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-config();
+config({ quiet: true });
 
 // --- Parse CLI args ---
 const rawArgs = process.argv.slice(2);
