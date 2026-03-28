@@ -9,7 +9,7 @@ import chalk from 'chalk';
 import { createCiTools } from './tools/ci-tools.ts';
 import { createSandboxTools } from './tools/sandbox-tools.ts';
 import { createGitHubTools } from './tools/github-tools.ts';
-import { createSandbox, destroySandbox, populateSandbox } from './sandbox.ts';
+import { createSandbox, destroySandbox, populateSandbox, initGitCredentials } from './sandbox.ts';
 import { runAgent } from './agent.ts';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -99,6 +99,9 @@ async function main() {
   console.log(chalk.dim('Starting Docker sandbox...'));
   const containerId = await createSandbox({ githubToken: githubToken! });
   console.log(chalk.dim(`Sandbox ready: ${containerId.substring(0, 12)}`));
+
+  // Initialize git credentials for push authentication
+  await initGitCredentials(containerId);
 
   if (scenario) {
     const projectDir = join(__dirname, 'fixtures', scenario, 'project');

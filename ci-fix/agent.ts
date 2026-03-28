@@ -20,7 +20,7 @@ export async function runAgent({ model, tools, repo, branch, log }: AgentConfig)
     system: SYSTEM_PROMPT,
     messages: [{ role: 'user', content: initialMessage }],
     tools,
-    maxOutputTokens: 10649,
+    maxOutputTokens: 7000,
     stopWhen: stepCountIs(25),
     onStepFinish: ({ stepNumber, toolCalls, toolResults, finishReason, usage }) => {
       log(`\n[step:${stepNumber}] finishReason=${finishReason} tokens=${usage.totalTokens} toolCalls=${toolCalls.length} toolResults=${toolResults.length}`);
