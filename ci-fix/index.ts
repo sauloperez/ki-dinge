@@ -69,12 +69,6 @@ if (!checkDocker()) {
   process.exit(1);
 }
 
-const aiGatewayKey = process.env.AI_GATEWAY_API_KEY;
-if (!aiGatewayKey) {
-  console.error(chalk.red('AI_GATEWAY_API_KEY environment variable is required.'));
-  process.exit(1);
-}
-
 const githubToken = process.env.GITHUB_TOKEN;
 if (!githubToken) {
   console.error(chalk.red('GITHUB_TOKEN environment variable is required.'));
