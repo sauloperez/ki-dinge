@@ -30,5 +30,4 @@ jobs:
       - uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          direct_prompt: ${{ steps.prompt.outputs.content }}
-          allowed_tools: "Bash,Read,Write,Glob"
+          prompt: ${{ steps.prompt.outputs.content }}
