@@ -30,5 +30,9 @@ export async function initGitCredentials(containerId: string): Promise<void> {
   // Configure git to use GITHUB_TOKEN for authentication via credential helper
   // This allows git push to work without exposing the token in remote URLs
   const credentialHelper = '!f() { echo "username=x-access-token"; echo "password=$GITHUB_TOKEN"; }; f';
-  await exec('docker', ['exec', containerId, 'sh', '-c', `git config --global credential.helper '${credentialHelper}'`]);
+  await exec('docker', ['exec', containerId, 'sh', '-c',
+    `git config --global credential.helper '${credentialHelper}' && \
+     git config --global user.email "ci-fix-bot@localhost" && \
+     git config --global user.name "CI Fix Bot"`,
+  ]);
 }
