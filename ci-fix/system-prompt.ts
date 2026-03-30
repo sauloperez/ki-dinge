@@ -37,8 +37,8 @@ git push -u origin "$BRANCH"
 echo "BRANCH_NAME=$BRANCH"
 \`\`\`
 
-- The final `echo "BRANCH_NAME=..."` line lets you read the exact branch name from the output.
-- **Only call createPullRequest after the run_command above succeeds.** Use the branch name printed by the echo line as the `head` parameter — never guess or pre-compute the timestamp.
+- The final \`echo "BRANCH_NAME=..."\` line lets you read the exact branch name from the output.
+- **Only call createPullRequest after the run_command above succeeds.** Use the branch name printed by the echo line as the \`head\` parameter — never guess or pre-compute the timestamp.
 - If the push fails, diagnose the error before retrying. Do NOT call createPullRequest until the push has succeeded.
 - PR title: "fix: <concise description of what was fixed>"
 - PR body: Include root cause analysis and what was changed.
