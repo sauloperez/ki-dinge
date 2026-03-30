@@ -95,7 +95,31 @@ function setupLogging(): LogContext {
 }
 
 function printRunSummary({ repo, branch, scenario, model, logFile }: RunConfig & { logFile: string }) {
-  console.log(`\n${chalk.bold('CI Fix Agent')} ${chalk.dim('-- autonomous CI failure diagnosis and repair')}\n`);
+  const art = [
+    '  ██████╗  ██╗   ███████╗██╗██╗  ██╗',
+    ' ██╔════╝  ██║   ██╔════╝██║╚██╗██╔╝',
+    ' ██║       ██║   █████╗  ██║ ╚███╔╝ ',
+    ' ██║       ██║   ██╔══╝  ██║ ██╔██╗ ',
+    ' ╚██████╗  ██║   ██║     ██║██╔╝ ██╗',
+    '  ╚═════╝  ╚═╝   ╚═╝     ╚═╝╚═╝  ╚═╝',
+  ];
+  const N = art.length;
+
+  if (process.stdout.isTTY) {
+    const shadow = art.map(line => '  ' + line);
+    process.stdout.write('\n');
+    process.stdout.write('\n'.repeat(N + 1));
+    process.stdout.write(`\x1b[${N + 1}A`);
+    process.stdout.write('\x1b[1B');
+    shadow.forEach(line => process.stdout.write(chalk.rgb(20, 50, 70).dim(line) + '\n'));
+    process.stdout.write(`\x1b[${N + 1}A`);
+    art.forEach(line => process.stdout.write(chalk.bold.cyanBright(line) + '\n'));
+    process.stdout.write('\n');
+  } else {
+    console.log('\n' + art.map(line => chalk.bold.cyanBright(line)).join('\n') + '\n');
+  }
+
+  console.log(chalk.dim('  ◈  autonomous ci failure diagnosis & repair  ◈\n'));
   console.log(`${chalk.cyan('Repo:')}     ${repo}`);
   console.log(`${chalk.cyan('Branch:')}   ${branch}`);
   console.log(`${chalk.cyan('Scenario:')} ${scenario || 'live'}`);
