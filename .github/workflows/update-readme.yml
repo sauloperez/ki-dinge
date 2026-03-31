@@ -20,6 +20,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{ github.token }}
 
       - name: Read prompt
         id: prompt
@@ -45,6 +47,7 @@ jobs:
 
       - name: Create PR if README changed
         env:
+          GITHUB_TOKEN: ${{ github.token }}
           GH_TOKEN: ${{ github.token }}
         run: |
           if git diff --quiet README.md; then
@@ -52,6 +55,11 @@ jobs:
             exit 0
           fi
 
+          # Configure git authentication
+          git config --global user.name "claude[bot]"
+          git config --global user.email "claude[bot]@users.noreply.github.com"
+          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
+          
           BRANCH="claude/update-readme-$(date +%s)"
           git checkout -b "$BRANCH"
           git add README.md
