@@ -30,6 +30,7 @@ jobs:
       - uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          model: claude-3-haiku-20240307
           prompt: ${{ steps.prompt.outputs.content }}
 
       - name: Create PR if README changed
