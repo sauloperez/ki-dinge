@@ -33,9 +33,14 @@ jobs:
       - uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          prompt: ${{ steps.prompt.outputs.content }}
+          prompt: |
+            REPO: ${{ github.repository }}
+            BRANCH: ${{ github.ref_name }}
+            
+            ${{ steps.prompt.outputs.content }}
           claude_args: |
             --model claude-3-haiku-20240307
+            --allowedTools "Read,Write,Edit,Bash(ls:*),Bash(find:*),Bash(cat:*)"
           show_full_output: true
 
       - name: Create PR if README changed
