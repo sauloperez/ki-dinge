@@ -1,4 +1,4 @@
-# ki-dinge
+# ki-dinge Monorepo
 
 LLM/AI Agent Proof of Concepts — a monorepo of focused experiments.
 
