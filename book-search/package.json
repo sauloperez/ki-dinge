@@ -1,0 +1,17 @@
+{
+  "name": "book-search",
+  "type": "module",
+  "dependencies": {
+    "@openrouter/sdk": "^0.9.11",
+    "dotenv": "^16.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  },
+  "pnpm": {
+    "ignoredBuiltDependencies": [
+      "@openrouter/sdk"
+    ]
+  }
+}

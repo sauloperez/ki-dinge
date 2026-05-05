@@ -1,0 +1,8 @@
+{
+  "name": "get-hostname-loop",
+  "type": "module",
+  "devDependencies": {
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}
