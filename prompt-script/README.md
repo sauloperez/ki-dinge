@@ -4,7 +4,7 @@ This example demonstrates how to send a prompt to an LLM and stream back a forma
 
 ## How it works
 
-This PoC streams LLM responses and post-processes the output with `jq` and `sed` to:
+This PoC streams LLM responses and post-processes the output with `jq` to:
 - Concatenate streaming tokens while preserving formatting (lists, paragraphs, enumerations)
 - Clean up excess whitespace
 
